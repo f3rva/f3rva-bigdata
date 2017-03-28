@@ -1,6 +1,11 @@
-<?php 
+<?php
+namespace F3;
+
 define('__ROOT__', dirname(dirname(__FILE__))); 
-require(__ROOT__ . '/repo/workoutRepo.php'); 
+require(__ROOT__ . '/repo/workout.php');
+
+use F3\Service\WorkoutService;
+
 ?>
 
 <!DOCTYPE html>

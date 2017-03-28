@@ -1,5 +1,5 @@
 <?php 
-define('__ROOT__', dirname(dirname(dirname(dirname(__FILE__)))); 
+define('__ROOT__', dirname(dirname(dirname(dirname(__FILE__))))); 
 require(__ROOT__ . '/repo/memberRepo.php'); 
 require(__ROOT__ . '/repo/workoutRepo.php'); 
 ?>

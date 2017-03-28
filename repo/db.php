@@ -1,10 +1,17 @@
-<?php 
+<?php
+namespace F3\Repo;
+
 define('__ROOT__', dirname(dirname(__FILE__))); 
 require_once(__ROOT__ . '/settings.php'); 
-?>
 
-<?
+use F3\Settings;
+use PDO;
 
+/**
+ * Singleton class used as a container for database connectivity
+ * 
+ * @author bbischoff
+ */
 class Database 
 {
     private $_db;

@@ -1,7 +1,12 @@
-<?php require_once('db.php'); ?>
-
 <?php
+namespace F3\Repo;
+require_once('db.php');
 
+/**
+ * Member repository encapsulating all database access for a member.
+ * 
+ * @author bbischoff
+ */
 class MemberRepository {
     protected $db;
 

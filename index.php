@@ -1,6 +1,10 @@
-<?php 
-define('__ROOT__', dirname(__FILE__)); 
-require(__ROOT__ . '/repo/workoutRepo.php'); 
+<?php
+namespace F3;
+
+define('__ROOT__', dirname(__FILE__));
+require_once(__ROOT__ . '/service/workout.php');
+
+use F3\Service\WorkoutService;
 ?>
 
 <!DOCTYPE html>
@@ -18,8 +22,8 @@ require(__ROOT__ . '/repo/workoutRepo.php');
 <body>
 
 <?php
-    $workoutRepo = new WorkoutRepository();
-    $workouts = $workoutRepo->findAll();
+    $workoutService = new WorkoutService();
+    $workouts = $workoutService->getWorkouts();
 ?>
 
 <table class="table table-striped">
@@ -34,11 +38,17 @@ require(__ROOT__ . '/repo/workoutRepo.php');
     foreach ($workouts as $workout) {
 ?>
     <tr>
-        <td><?= $workout['WORKOUT_DATE'] ?></td>
-        <td><a href="<?= $workout['BACKBLAST_URL'] ?>" target="_blank"><?= $workout['TITLE'] ?></a></td>
-        <td><?= $workout['AO'] ?></td>
-        <td><?= $workout['Q'] ?></td>
-        <td><a href="/workout/detail.php?id=<?= $workout['WORKOUT_ID'] ?>"><?= $workout['PAX'] ?></a></td>
+        <td><?= $workout->getWorkoutDate() ?></td>
+        <td><a href="<?= $workout->getBackblastUrl() ?>" target="_blank"><?= $workout->getTitle() ?></a></td>
+        <td>
+        	<ul class="list-unstyled">
+        	<? foreach ($workout->getAo() as $ao) { ?>
+        		<li><?= $ao ?></li>
+        	<? } ?>
+        	</ul>
+        </td>
+        <td><?= $workout->getQ() ?></td>
+        <td><a href="/workout/detail.php?id=<?= $workout->getWorkoutId() ?>"><?= $workout->getPax() ?></a></td>
     </tr>
 <?
     }

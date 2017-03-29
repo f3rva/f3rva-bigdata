@@ -2,7 +2,7 @@
 namespace F3;
 
 define('__ROOT__', dirname(dirname(__FILE__))); 
-require(__ROOT__ . '/repo/workout.php');
+require(__ROOT__ . '/service/workout.php');
 
 use F3\Service\WorkoutService;
 
@@ -23,19 +23,19 @@ use F3\Service\WorkoutService;
 <body>
 
 <?
-    $workoutRepo = new WorkoutRepository();
-    $details = $workoutRepo->find($_REQUEST['id']);
+    $workoutService = new WorkoutService();
+    $detail = $workoutService->getWorkout($_REQUEST['id']);
 ?>
 
-<h1><?= $details[0]['TITLE']; ?></h1>
-<h2>Q: <?= $details[0]['Q']; ?></h2>
+<h1><?= $detail->getTitle() ?></h1>
+<h2>Q: <?= $detail->getQ() ?></h2>
 
 <table class="table table-striped">
 
-<?    
-    foreach ($details as $detail) {
+<?
+    foreach ($detail->getPax() as $pax) {
 ?>
-    <tr><td><? echo $detail['PAX'] ?></td></tr>
+    <tr><td><?= $pax->getF3Name() ?></td></tr>
 <?
     }
 ?>

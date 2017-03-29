@@ -42,36 +42,76 @@ class WorkoutService {
 		foreach ($workouts as $workout) {
 			$workoutId = $workout['WORKOUT_ID'];
 			if (is_null($workoutsArray[$workoutId])) {
-				$workoutObj = new Workout();
-				
-				$aoArray = array();
-				$aoArray[$workout['AO_ID']] = $workout['AO'];
-				$workoutObj->setAo($aoArray);
-				
-				$workoutObj->setBackblastUrl($workout['BACKBLAST_URL']);
-				$workoutObj->setPax($workout['PAX']);
-				$workoutObj->setQ($workout['Q']);
-				$workoutObj->setTitle($workout['TITLE']);
-				$workoutObj->setWorkoutId($workoutId);
-				$workoutObj->setWorkoutDate($workout['WORKOUT_DATE']);
-
+				$workoutObj = $this->createWorkout($workout);
 				$workoutsArray[$workoutObj->getWorkoutId()] = $workoutObj;
 			}
 			else {
 				// we already have the workout details, just add the duplicate info
-				$existingWorkout = $workoutsArray[$workoutId];
-				$aoArray = $existingWorkout->getAo();
-				$aoArray[$workout['AO_ID']] = $workout['AO'];
-				$existingWorkout->setAo($aoArray);
+				if (!is_null($workout['AO_ID'])) {
+					$existingWorkout = $workoutsArray[$workoutId];
+					$existingWorkout = $this->addAoToWorkout($existingWorkout, $workout['AO_ID'], $workout['AO']);
+				}
 			}
 		}
 		
-		//var_dump($workoutsArray);
 		return $workoutsArray;
     }
     
     public function getWorkout($workoutId) {
     	$details = $this->workoutRepo->find($workoutId);
+    	$workoutObj = null;
+    	
+    	foreach ($details as $workout) {
+    		$workoutId = $workout['WORKOUT_ID'];
+    		if (is_null($workoutObj)) {
+    			$workoutObj = $this->createWorkout($workout);
+    			
+    			// retrieve pax
+    			$paxList = $this->workoutRepo->findPax($workoutId);
+    			$paxArray = array();
+    			foreach ($paxList as $pax) {
+    				$member = new Member();
+    				$member->setMemberId($pax["MEMBER_ID"]);
+    				$member->setF3Name($pax["F3_NAME"]);
+    				$paxArray[$member->getMemberId()] = $member;
+    			}
+    			$workoutObj->setPax($paxArray);
+    		}
+    		else {
+    			// we already have the workout details, just add the duplicate info
+    			$workoutObj = $this->addAoToWorkout($workoutObj, $workout['AO_ID'], $workout['AO']);
+    		}
+    	}
+    	
+    	return $workoutObj;
+    }
+    
+    private function createWorkout($workout) {
+    	$workoutObj = new Workout();
+    	
+    	$aoArray = array();
+    	// only add the AO if it exists
+    	if (!is_null($workout['AO_ID'])) {
+    		$aoArray[$workout['AO_ID']] = $workout['AO'];
+    	}
+    	$workoutObj->setAo($aoArray);
+    	
+    	$workoutObj->setBackblastUrl($workout['BACKBLAST_URL']);
+    	$workoutObj->setPaxCount($workout['PAX_COUNT']);
+    	$workoutObj->setQ($workout['Q']);
+    	$workoutObj->setTitle($workout['TITLE']);
+    	$workoutObj->setWorkoutId($workout['WORKOUT_ID']);
+    	$workoutObj->setWorkoutDate($workout['WORKOUT_DATE']);
+    	
+    	return $workoutObj;
+    }
+    
+    private function addAoToWorkout($workout, $aoId, $aoDescription) {
+    	$aoArray = $workout->getAo();
+    	$aoArray[$aoId] = $aoDescription;
+    	$workout->setAo($aoArray);
+    	
+    	return $workout;
     }
 }
 

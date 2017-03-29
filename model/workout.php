@@ -8,6 +8,7 @@ class Workout {
 	private $ao;
 	private $q;
 	private $pax;
+	private $paxCount;
 	private $workoutDate;
 
 	public function getWorkoutId() {
@@ -57,7 +58,15 @@ class Workout {
 	public function setPax($pax) {
 		$this->pax = $pax;
 	}
-
+	
+	public function getPaxCount() {
+		return $this->paxCount;
+	}
+	
+	public function setPaxCount($paxCount) {
+		$this->paxCount = $paxCount;
+	}
+	
 	public function getWorkoutDate() {
 		return $this->workoutDate;
 	}

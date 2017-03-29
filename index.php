@@ -48,7 +48,7 @@ use F3\Service\WorkoutService;
         	</ul>
         </td>
         <td><?= $workout->getQ() ?></td>
-        <td><a href="/workout/detail.php?id=<?= $workout->getWorkoutId() ?>"><?= $workout->getPax() ?></a></td>
+        <td><a href="/workout/detail.php?id=<?= $workout->getWorkoutId() ?>"><?= $workout->getPaxCount() ?></a></td>
     </tr>
 <?
     }

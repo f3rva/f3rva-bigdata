@@ -1,6 +1,6 @@
 <?php
 namespace F3\Repo;
-require_once('db.php'); 
+require_once('Database.php'); 
 
 /**
  * Workout repository encapsulating all database access for a workout.
@@ -13,7 +13,7 @@ class WorkoutRepository {
     public function __construct() {
         $this->db = Database::getInstance()->getDatabase();
     }
-
+    
     public function find($id) {
         $stmt = $this->db->prepare('
             select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.F3_NAME as Q from WORKOUT w
@@ -24,7 +24,8 @@ class WorkoutRepository {
 		');
         $stmt->execute([$id]);
         
-        return $stmt->fetchAll();
+        $result = $stmt->fetchAll();
+        return $result;
     }
 
     public function findAll() {
@@ -52,7 +53,56 @@ class WorkoutRepository {
     	
     	return $stmt->fetchAll();
     }
+    
+    public function save($title, $qId, $url) {
+    	$stmt = $this->db->prepare('
+			insert into WORKOUT(TITLE, WORKOUT_DATE, Q, BACKBLAST_URL) values (?, NOW(), ?, ?)
+		');
+    	
+    	$stmt->execute([$title, $qId, $url]);
+    	
+    	return $this->db->lastInsertId();
+    }
+    
+    public function saveWorkoutMember($workoutId, $memberId) {
+    	$stmt = $this->db->prepare('
+			insert into WORKOUT_PAX(WORKOUT_ID, MEMBER_ID) values (?, ?)
+		');
+    	
+    	$stmt->execute([$workoutId, $memberId]);
+    }
+    
+    public function saveWorkoutAo($workoutId, $aoId) {
+    	$stmt = $this->db->prepare('
+			insert into WORKOUT_AO(WORKOUT_ID, AO_ID) values (?, ?)
+		');
+    	
+    	$stmt->execute([$workoutId, $aoId]);
+    }
+    
+    // select the ao or add it if it doesn't exist
+    public function selectOrAddAo($aoDescription) {
+    	$stmt = $this->db->prepare('
+			select AO_ID, DESCRIPTION from AO where upper(DESCRIPTION) = ?
+		');
+    	$stmt->execute([strtoupper($aoDescription)]);
+    	$aoResult = $stmt->fetch();
+    	
+    	// found
+    	if ($aoResult) {
+    		// found an existing AO
+    		$ao = (object) array('aoId' => $aoResult['AO_ID'], 'description' => $aoResult['DESCRIPTION']);
+    	}
+    	else {
+    		// not found, create
+    		$stmt = $pdo->prepare('insert into AO(DESCRIPTION) values (?)');
+    		$stmt->execute([$aoDescription]);
+    		
+    		$ao = (object) array('aoId' => $pdo->lastInsertId(), 'description' => $aoDescription);
+    	}
+    	
+    	return $ao;
+    }
 }
-
 
 ?>

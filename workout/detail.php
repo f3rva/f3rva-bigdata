@@ -2,7 +2,7 @@
 namespace F3;
 
 define('__ROOT__', dirname(dirname(__FILE__))); 
-require(__ROOT__ . '/service/workout.php');
+require(__ROOT__ . '/service/WorkoutService.php');
 
 use F3\Service\WorkoutService;
 
@@ -29,6 +29,14 @@ use F3\Service\WorkoutService;
 
 <h1><?= $detail->getTitle() ?></h1>
 <h2>Q: <?= $detail->getQ() ?></h2>
+<div style="display: flex;">
+	<span>AO:</span>
+	<ul class="list-inline">
+	<? foreach ($detail->getAo() as $ao) { ?>
+		<li><?= $ao ?></li>
+	<? } ?>
+	</ul>
+</div>
 
 <table class="table table-striped">
 

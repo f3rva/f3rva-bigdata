@@ -1,6 +1,6 @@
 <?php
 namespace F3\Repo;
-require_once('db.php');
+require_once('Database.php');
 
 /**
  * Member repository encapsulating all database access for a member.
@@ -23,21 +23,23 @@ class MemberRepository {
                 left outer join MEMBER_ALIAS ma ON m.MEMBER_ID=ma.MEMBER_ID
                 where UPPER(m.F3_NAME)=? or UPPER(ma.F3_ALIAS)=?'
         );
-        $stmt->execute([strtoupper($f3Name), strtoupper($f3Name)]);
+        $upperName = strtoupper($f3name);
+        $stmt->execute([$upperName, $upperName]);
         
-        return $stmt->fetch();
-    }
-
+        $result = $stmt->fetch();
+        return $result;
+    }    
+    
     /**
-     * Inserts the user into the database and returns an object with the meber id and f3name
+     * Inserts the user into the database and returns the id of the inserted member
      */
-    public function save($f3name) {
+    public function save($name) {
         $stmt = $this->db->prepare('
-            insert into MEMBER(F3_NAME) values (?)'
-        );
-        $stmt->execute([$f3Name]);
+            insert into MEMBER(F3_NAME) values (?)
+		');
+        $stmt->execute([$name]);
         
-        return (object) array('memberId' => $pdo->lastInsertId(), 'f3Name' => $f3Name);
+        return $this->db->lastInsertId();        
     }
 }
 

@@ -2,7 +2,7 @@
 namespace F3;
 
 define('__ROOT__', dirname(__FILE__));
-require_once(__ROOT__ . '/service/workout.php');
+require_once(__ROOT__ . '/service/WorkoutService.php');
 
 use F3\Service\WorkoutService;
 ?>

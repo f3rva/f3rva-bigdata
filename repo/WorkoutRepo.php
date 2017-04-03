@@ -95,10 +95,10 @@ class WorkoutRepository {
     	}
     	else {
     		// not found, create
-    		$stmt = $pdo->prepare('insert into AO(DESCRIPTION) values (?)');
+    		$stmt = $this->db->prepare('insert into AO(DESCRIPTION) values (?)');
     		$stmt->execute([$aoDescription]);
     		
-    		$ao = (object) array('aoId' => $pdo->lastInsertId(), 'description' => $aoDescription);
+    		$ao = (object) array('aoId' => $this->db->lastInsertId(), 'description' => $aoDescription);
     	}
     	
     	return $ao;

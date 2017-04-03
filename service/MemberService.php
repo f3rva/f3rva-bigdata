@@ -3,9 +3,11 @@ namespace F3\Service;
 
 define('__ROOT__', dirname(dirname(dirname(__FILE__))));
 require_once(__ROOT__ . '/model/Member.php');
+require_once(__ROOT__ . '/repo/Database.php');
 require_once(__ROOT__ . '/repo/MemberRepo.php');
 
 use F3\Model\Member;
+use F3\Repo\Database;
 use F3\Repo\MemberRepository;
 
 /**

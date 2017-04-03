@@ -56,16 +56,25 @@ class MemberService {
 	}
 	
 	public function assignAlias($memberId, $associatedMemberId) {
-		// create the alias if it doesn't already exist
-		$this->memberRepo->createAlias($memberId, $associatedMemberId);
-		
-		// re-link workout pax records
-		$this->memberRepo->relinkWorkoutPax($memberId, $associatedMemberId);
-		
-		// delete from member
-		$this->memberRepo->delete($associatedMemberId);
-		
-		// transation
+		$db = Database::getInstance()->getDatabase();
+		try {
+			$db->beginTransaction();
+			
+			// create the alias if it doesn't already exist
+			$this->memberRepo->createAlias($memberId, $associatedMemberId);
+			
+			// re-link workout pax records
+			$this->memberRepo->relinkWorkoutPax($memberId, $associatedMemberId);
+			
+			// delete from member
+			$this->memberRepo->delete($associatedMemberId);
+			
+			$db->commit();
+		}
+		catch (\Exception $e) {
+			$db->rollBack();
+			error_log($e);
+		}
 	}
 	
 	private function createMember($memberId, $f3Name) {

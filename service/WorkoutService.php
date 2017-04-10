@@ -114,7 +114,50 @@ class WorkoutService {
 		catch (\Exception $e) {
 			$db->rollBack();
 			error_log($e);
+			throw $e;
 		}
+		
+		return $workoutId;
+	}
+	
+	public function refreshWorkout($workoutId) {
+		// get the workout
+		$workout = $this->getWorkout($workoutId);
+		
+		// parse the post to get the information we need
+		$additionalInfo = $this->scraperDao->parsePost($workout->getBackblastUrl());
+		error_log('additionalInfo: ' . json_encode($additionalInfo));
+		
+		$db = Database::getInstance()->getDatabase();
+		try {
+			$db->beginTransaction();
+			
+			// find or insert the q
+			$q = $this->memberService->getOrAddMember($additionalInfo->q);
+			
+			// update the workout
+			$this->workoutRepo->update($workoutId, $workout->getTitle(), $q->getMemberId(), $workout->getBackblastUrl());
+			
+			// delete previous aos
+			$this->workoutRepo->deleteWorkoutAos($workoutId);
+			
+			// add the aos
+			$this->saveWorkoutAos($workoutId, $additionalInfo->tags);
+			
+			// delete the previous members
+			$this->workoutRepo->deleteWorkoutMembers($workoutId);
+			
+			// add the pax members
+			$this->saveWorkoutMembers($workoutId, $additionalInfo->pax);
+			
+			$db->commit();
+		}
+		catch (\Exception $e) {
+			$db->rollBack();
+			error_log($e);
+			throw $e;
+		}
+		
 		return $workoutId;
 	}
 	

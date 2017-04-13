@@ -1,7 +1,9 @@
 <?php
 namespace F3\Service;
 
-define('__ROOT__', dirname(dirname(dirname(__FILE__))));
+if (!defined('__ROOT__')) {
+	define('__ROOT__', dirname(dirname(dirname(__FILE__))));
+}
 require_once(__ROOT__ . '/dao/ScraperDao.php');
 require_once(__ROOT__ . '/model/Member.php');
 require_once(__ROOT__ . '/model/Workout.php');

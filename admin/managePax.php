@@ -1,7 +1,9 @@
 <?php
 namespace F3;
 
-define('__ROOT__', dirname(dirname(__FILE__)));
+if (!defined('__ROOT__')) {
+	define('__ROOT__', dirname(dirname(__FILE__)));
+}
 require_once(__ROOT__ . '/service/MemberService.php');
 
 use F3\Service\MemberService;
@@ -27,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <? include __ROOT__ . '/include/head.php';?>
 
 <body>
+<? include __ROOT__ . '/include/analytics.php'; ?>
 <? include __ROOT__ . '/include/nav.php';?>
 
 <?

@@ -30,14 +30,25 @@ class MemberRepository {
 		$stmt = $this->db->prepare('
 			select m.MEMBER_ID, m.F3_NAME from MEMBER m
 				left outer join MEMBER_ALIAS ma ON m.MEMBER_ID=ma.MEMBER_ID
-				where UPPER(m.F3_NAME)=? or UPPER(ma.F3_ALIAS)=?'
-		);
+				where UPPER(m.F3_NAME)=? or UPPER(ma.F3_ALIAS)=?
+		');
 		$upperName = strtoupper($f3name);
 		$stmt->execute([$upperName, $upperName]);
 		
 		$result = $stmt->fetch();
 		return $result;
-	}	
+	}
+	
+	public function findExistingAlias($memberId, $associatedMemberId) {
+		$stmt = $this->db->prepare('
+			select ma.MEMBER_ID, ma.F3_ALIAS from MEMBER_ALIAS ma
+				where ma.MEMBER_ID=?
+			    and ma.F3_ALIAS=(select F3_NAME from MEMBER where MEMBER_ID=?)
+		');
+		$stmt->execute([$memberId, $associatedMemberId]);
+		
+		return $stmt->fetch();
+	}
 	
 	/**
 	 * Inserts the user into the database and returns the id of the inserted member
@@ -76,6 +87,16 @@ class MemberRepository {
 	public function relinkWorkoutPax($memberId, $associatedMemberId) {
 		$stmt = $this->db->prepare('
 			update WORKOUT_PAX
+				set MEMBER_ID=?
+				where MEMBER_ID=?
+		');
+		
+		$stmt->execute([$memberId, $associatedMemberId]);
+	}
+
+	public function relinkMemberAlias($memberId, $associatedMemberId) {
+		$stmt = $this->db->prepare('
+			update MEMBER_ALIAS
 				set MEMBER_ID=?
 				where MEMBER_ID=?
 		');

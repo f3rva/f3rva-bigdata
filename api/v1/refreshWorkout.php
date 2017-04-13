@@ -1,5 +1,7 @@
 <?php 
-define('__ROOT__', dirname(dirname(dirname(__FILE__)))); 
+if (!defined('__ROOT__')) {
+	define('__ROOT__', dirname(dirname(dirname(__FILE__))));
+}
 require(__ROOT__ . '/service/WorkoutService.php');
 
 use F3\Service\WorkoutService;

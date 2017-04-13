@@ -1,7 +1,9 @@
 <?php
 namespace F3;
 
-define('__ROOT__', dirname(dirname(__FILE__))); 
+if (!defined('__ROOT__')) {
+	define('__ROOT__', dirname(dirname(__FILE__))); 
+}
 require(__ROOT__ . '/service/WorkoutService.php');
 
 use F3\Service\WorkoutService;
@@ -13,6 +15,7 @@ use F3\Service\WorkoutService;
 <? include __ROOT__ . '/include/head.php';?>
 
 <body>
+<? include __ROOT__ . '/include/analytics.php';?>
 <? include __ROOT__ . '/include/nav.php';?>
 
 <?

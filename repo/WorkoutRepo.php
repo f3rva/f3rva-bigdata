@@ -47,9 +47,9 @@ class WorkoutRepository {
 	public function findAll() {
 		$stmt = $this->db->query('
 			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.F3_NAME as Q, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
-				join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
+				left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
 				left outer join MEMBER mq on w.Q = mq.MEMBER_ID
-				join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
+				left outer join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
 				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
 				left outer join AO ao on wao.AO_ID = ao.AO_ID
 				group by w.WORKOUT_ID, ao.AO_ID, ao.DESCRIPTION
@@ -70,6 +70,17 @@ class WorkoutRepository {
 		return $stmt->fetchAll();
 	}
 	
+	public function findWorkoutMember($workoutId, $memberId) {
+		$stmt = $this->db->prepare('
+			select wp.WORKOUT_ID, wp.MEMBER_ID, m.F3_NAME from WORKOUT_PAX wp
+				join MEMBER m on wp.MEMBER_ID = m.MEMBER_ID
+				where wp.WORKOUT_ID=? and wp.MEMBER_ID=?;
+		');
+		$stmt->execute([$workoutId, $memberId]);
+		
+		return $stmt->fetch();
+	}
+	
 	public function save($title, $qId, $url) {
 		$stmt = $this->db->prepare('
 			insert into WORKOUT(TITLE, WORKOUT_DATE, Q, BACKBLAST_URL) values (?, NOW(), ?, ?)
@@ -81,11 +92,13 @@ class WorkoutRepository {
 	}
 	
 	public function saveWorkoutMember($workoutId, $memberId) {
-		$stmt = $this->db->prepare('
-			insert into WORKOUT_PAX(WORKOUT_ID, MEMBER_ID) values (?, ?)
-		');
-		
-		$stmt->execute([$workoutId, $memberId]);
+		if (!$this->findWorkoutMember($workoutId, $memberId)) {
+			$stmt = $this->db->prepare('
+				insert into WORKOUT_PAX(WORKOUT_ID, MEMBER_ID) values (?, ?)
+			');
+			
+			$stmt->execute([$workoutId, $memberId]);
+		}
 	}
 	
 	public function saveWorkoutAo($workoutId, $aoId) {

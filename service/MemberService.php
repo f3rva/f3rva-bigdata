@@ -65,10 +65,15 @@ class MemberService {
 			$db->beginTransaction();
 			
 			// create the alias if it doesn't already exist
-			$this->memberRepo->createAlias($memberId, $associatedMemberId);
+			if (!$this->memberRepo->findExistingAlias($memberId, $associatedMemberId)) {
+				$this->memberRepo->createAlias($memberId, $associatedMemberId);
+			}
 			
 			// re-link workout pax records
 			$this->memberRepo->relinkWorkoutPax($memberId, $associatedMemberId);
+			
+			// re-assign existing aliases
+			$this->memberRepo->relinkMemberAlias($memberId, $associatedMemberId);
 			
 			// delete from member
 			$this->memberRepo->delete($associatedMemberId);

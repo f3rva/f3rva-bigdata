@@ -2,7 +2,7 @@
 if (!defined('__ROOT__')) {
 	define('__ROOT__', dirname(dirname(dirname(__FILE__))));
 }
-require_once(__ROOT__ . '/dao/ScraperDao.php');
+require(__ROOT__ . '/dao/ScraperDao.php');
 
 use F3\Dao\ScraperDao;
 
@@ -30,9 +30,11 @@ function exit_error($status, $code, $message) {
 	exit(0);
 }
 
-init_response();
-$data = validateInput();
-$scraper = new ScraperDao();
-
-echo json_encode($scraper->parsePost($data->post->url));
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+	init_response();
+	$data = validateInput();
+	$scraper = new ScraperDao();
+	
+	echo json_encode($scraper->parsePost($data->post->url));
+}
 ?>

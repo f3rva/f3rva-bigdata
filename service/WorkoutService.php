@@ -103,7 +103,7 @@ class WorkoutService {
 			$q = $this->memberService->getOrAddMember($additionalInfo->q);
 			
 			// insert the workout
-			$workoutId = $this->workoutRepo->save($data->post->title, $q->getMemberId(), $data->post->url);
+			$workoutId = $this->workoutRepo->save($data->post->title, $additionalInfo->date, $q->getMemberId(), $data->post->url);
 			
 			// add the aos
 			$this->saveWorkoutAos($workoutId, $additionalInfo->tags);

@@ -2,6 +2,9 @@
 namespace F3\Repo;
 require_once('Database.php'); 
 
+use DateTime;
+use DateTimeZone;
+
 /**
  * Workout repository encapsulating all database access for a workout.
  *
@@ -81,12 +84,19 @@ class WorkoutRepository {
 		return $stmt->fetch();
 	}
 	
-	public function save($title, $qId, $url) {
+	public function save($title, $dateArray, $qId, $url) {
 		$stmt = $this->db->prepare('
-			insert into WORKOUT(TITLE, WORKOUT_DATE, Q, BACKBLAST_URL) values (?, NOW(), ?, ?)
+			insert into WORKOUT(TITLE, WORKOUT_DATE, Q, BACKBLAST_URL) values (?, ?, ?, ?)
 		');
 		
-		$stmt->execute([$title, $qId, $url]);
+		// default to now if no date is available
+		$dateStr = (new DateTime('now', new DateTimeZone('America/New_York')))->format('Y-m-d');
+		
+		if ($dateArray) {
+			$dateStr = $dateArray['year'] . '-' . $dateArray['month'] . '-' . $dateArray['day'];
+		}
+
+		$stmt->execute([$title, $dateStr, $qId, $url]);
 		
 		return $this->db->lastInsertId();
 	}

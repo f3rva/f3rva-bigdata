@@ -34,6 +34,7 @@ class ScraperDao {
 		// query to get the workout date
 		$dateNode = $xpath->query("//ul/li/strong[text()='When:']")->item(0);
 		$dateStr = trim($dateNode->nextSibling->nodeValue);
+		$date = date_parse($dateStr);
 		
 		// query to get the Q
 		$qNode = $xpath->query("//ul/li/strong[text()='QIC:']")->item(0);
@@ -54,7 +55,7 @@ class ScraperDao {
 		}
 		
 		// create an object to return;
-		return (object) array('q' => $qStr, 'pax' => $paxArray, 'tags' => $tagsArray);
+		return (object) array('q' => $qStr, 'pax' => $paxArray, 'tags' => $tagsArray, 'date' => $date);
 	}
 }
 ?>

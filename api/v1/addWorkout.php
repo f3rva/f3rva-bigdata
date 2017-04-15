@@ -30,11 +30,12 @@ function exit_error($status, $code, $message) {
     exit(0);
 }
 
-init_response();
-$data = validateInput();
-error_log('request: ' . json_encode($data));
-
-$workoutService = new WorkoutService();
-$workout = $workoutService->addWorkout($data);
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+	init_response();
+	$data = validateInput();
+	error_log('request: ' . json_encode($data));
+	
+	$workoutService = new WorkoutService();
+	$workout = $workoutService->addWorkout($data);
+}
 ?>

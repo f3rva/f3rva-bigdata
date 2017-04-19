@@ -93,7 +93,17 @@ class MemberRepository {
 		
 		$stmt->execute([$memberId, $associatedMemberId]);
 	}
-
+	
+	public function relinkWorkoutQ($memberId, $associatedMemberId) {
+		$stmt = $this->db->prepare('
+			update WORKOUT_Q
+				set MEMBER_ID=?
+				where MEMBER_ID=?
+		');
+		
+		$stmt->execute([$memberId, $associatedMemberId]);
+	}
+	
 	public function relinkMemberAlias($memberId, $associatedMemberId) {
 		$stmt = $this->db->prepare('
 			update MEMBER_ALIAS

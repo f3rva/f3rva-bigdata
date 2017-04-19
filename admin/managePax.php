@@ -12,10 +12,21 @@ $memberService = new MemberService();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	// process post
-	$memberId = $_REQUEST['memberId'];
-	$associatedMemberId= $_REQUEST['associatedMemberId'];
+	$action = $_REQUEST['action'];
 	
-	$memberService->assignAlias($memberId, $associatedMemberId);
+	switch ($action) {
+		case 'merge': 
+			$memberId = $_REQUEST['memberId'];
+			$associatedMemberId= $_REQUEST['associatedMemberId'];
+			
+			$memberService->assignAlias($memberId, $associatedMemberId);
+			
+			break;
+		case 'split': 
+			break;
+		default:
+			break;
+	}	
 	
 	// redirect to self
 	$self = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
@@ -58,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		</div>
 		<div class="col-md-3">
 			<form method="post" action="managePax.php">
+				<input type="hidden" name="action" value="merge" />
 				<div class="form-group">
 					<label for="memberId">ID</label>
 					<input type="text" name="memberId" class="form-control" id="memberId" placeholder="ID">
@@ -69,6 +81,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 					<p class="help-block">ID of member you want to assocate with the primary user above</p>
 				</div>
 				<button type="submit" class="btn btn-default">Create Alias</button>
+			</form>
+		</div>
+		<div class="col-md-3">
+			<form method="post" action="managePax.php">
+				<input type="hidden" name="action" value="split" />
+				<div class="form-group">
+					<label for="memberId">ID</label>
+					<input type="text" name="memberId" class="form-control" id="memberId" placeholder="ID">
+					<p class="help-block">ID of the member to split</p>
+				</div>
+				<button type="submit" class="btn btn-default">Split</button>
 			</form>
 		</div>
 	</div>

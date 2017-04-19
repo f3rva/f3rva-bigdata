@@ -33,12 +33,21 @@ class WorkoutRepository {
 		$stmt->execute([$workoutId]);
 	}
 	
+	public function deleteWorkoutQs($workoutId) {
+		$stmt = $this->db->prepare('
+			delete from WORKOUT_Q
+				where WORKOUT_ID=?
+		');
+		$stmt->execute([$workoutId]);
+	}
+	
 	public function find($id) {
 		$stmt = $this->db->prepare('
-			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.F3_NAME as Q from WORKOUT w
-				left outer join MEMBER mq on w.Q = mq.MEMBER_ID
+			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q from WORKOUT w
 				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
 				left outer join AO ao on wao.AO_ID = ao.AO_ID
+				left outer join WORKOUT_Q wq on w.WORKOUT_ID = wq.WORKOUT_ID
+				left outer join MEMBER mq on wq.MEMBER_ID = mq.MEMBER_ID
 				where w.WORKOUT_ID=?
 		');
 		$stmt->execute([$id]);
@@ -49,13 +58,14 @@ class WorkoutRepository {
 
 	public function findAll() {
 		$stmt = $this->db->query('
-			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.F3_NAME as Q, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
+			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
 				left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
-				left outer join MEMBER mq on w.Q = mq.MEMBER_ID
+				left outer join WORKOUT_Q wq on w.WORKOUT_ID = wq.WORKOUT_ID
+				left outer join MEMBER mq on wq.MEMBER_ID = mq.MEMBER_ID
 				left outer join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
 				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
 				left outer join AO ao on wao.AO_ID = ao.AO_ID
-				group by w.WORKOUT_ID, ao.AO_ID, ao.DESCRIPTION
+				group by w.WORKOUT_ID, ao.AO_ID, mq.MEMBER_ID, ao.DESCRIPTION
 				order by w.WORKOUT_DATE desc, ao.DESCRIPTION asc
 		');
 		
@@ -84,19 +94,14 @@ class WorkoutRepository {
 		return $stmt->fetch();
 	}
 	
-	public function save($title, $dateArray, $qId, $url) {
+	public function save($title, $dateArray, $url) {
 		$stmt = $this->db->prepare('
-			insert into WORKOUT(TITLE, WORKOUT_DATE, Q, BACKBLAST_URL) values (?, ?, ?, ?)
+			insert into WORKOUT(TITLE, WORKOUT_DATE, BACKBLAST_URL) values (?, ?, ?)
 		');
 		
-		// default to now if no date is available
-		$dateStr = (new DateTime('now', new DateTimeZone('America/New_York')))->format('Y-m-d');
-		
-		if ($dateArray) {
-			$dateStr = $dateArray['year'] . '-' . $dateArray['month'] . '-' . $dateArray['day'];
-		}
+		$dateStr = $this->getDateString($dateArray);
 
-		$stmt->execute([$title, $dateStr, $qId, $url]);
+		$stmt->execute([$title, $dateStr, $url]);
 		
 		return $this->db->lastInsertId();
 	}
@@ -105,6 +110,16 @@ class WorkoutRepository {
 		if (!$this->findWorkoutMember($workoutId, $memberId)) {
 			$stmt = $this->db->prepare('
 				insert into WORKOUT_PAX(WORKOUT_ID, MEMBER_ID) values (?, ?)
+			');
+			
+			$stmt->execute([$workoutId, $memberId]);
+		}
+	}
+	
+	public function saveWorkoutQ($workoutId, $memberId) {
+		if (!$this->findWorkoutMember($workoutId, $memberId)) {
+			$stmt = $this->db->prepare('
+				insert into WORKOUT_Q(WORKOUT_ID, MEMBER_ID) values (?, ?)
 			');
 			
 			$stmt->execute([$workoutId, $memberId]);
@@ -143,14 +158,27 @@ class WorkoutRepository {
 		return $ao;
 	}
 	
-	public function update($workoutId, $title, $qId, $url) {
+	public function update($workoutId, $title, $dateArray, $url) {
 		$stmt = $this->db->prepare('
-			update WORKOUT set TITLE=?, WORKOUT_DATE=NOW(), Q=?, BACKBLAST_URL=?
+			update WORKOUT set TITLE=?, WORKOUT_DATE=?, BACKBLAST_URL=?
 				where WORKOUT_ID=?
 		');
 		
-		$stmt->execute([$title, $qId, $url, $workoutId]);
-	}	
+		$dateStr = $this->getDateString($dateArray);
+		
+		$stmt->execute([$title, $dateStr, $url, $workoutId]);
+	}
+	
+	private function getDateString($dateArray) {
+		// default to now if no date is available
+		$dateStr = (new DateTime('now', new DateTimeZone('America/New_York')))->format('Y-m-d');
+		
+		if ($dateArray) {
+			$dateStr = $dateArray['year'] . '-' . $dateArray['month'] . '-' . $dateArray['day'];
+		}
+		
+		return $dateStr;
+	}
 }
 
 ?>

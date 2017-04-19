@@ -72,6 +72,9 @@ class MemberService {
 			// re-link workout pax records
 			$this->memberRepo->relinkWorkoutPax($memberId, $associatedMemberId);
 			
+			// re-link workout q records
+			$this->memberRepo->relinkWorkoutQ($memberId, $associatedMemberId);
+			
 			// re-assign existing aliases
 			$this->memberRepo->relinkMemberAlias($memberId, $associatedMemberId);
 			

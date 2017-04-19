@@ -24,7 +24,15 @@ use F3\Service\WorkoutService;
 ?>
 
 <h1><?= $detail->getTitle() ?></h1>
-<h2>Q: <?= $detail->getQ() ?></h2>
+
+<div style="display: flex;">
+	<span>Q:</span>
+ 	<ul class="list-inline">
+	<? foreach ($detail->getQ() as $q) { ?>
+		<li><?= $q ?></li>
+	<? } ?>
+	</ul>
+</div>
 <div style="display: flex;">
 	<span>AO:</span>
 	<ul class="list-inline">

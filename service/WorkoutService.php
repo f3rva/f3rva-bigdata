@@ -54,6 +54,7 @@ class WorkoutService {
 				if (!is_null($workout['AO_ID'])) {
 					$existingWorkout = $workoutsArray[$workoutId];
 					$existingWorkout = $this->addAoToWorkout($existingWorkout, $workout['AO_ID'], $workout['AO']);
+					$existingWorkout = $this->addQToWorkout($existingWorkout, $workout['Q_ID'], $workout['Q']);
 				}
 			}
 		}
@@ -84,6 +85,7 @@ class WorkoutService {
 			else {
 				// we already have the workout details, just add the duplicate info
 				$workoutObj = $this->addAoToWorkout($workoutObj, $workout['AO_ID'], $workout['AO']);
+				$workoutObj = $this->addQToWorkout($workoutObj, $workout['Q_ID'], $workout['Q']);
 			}
 		}
 				
@@ -99,14 +101,14 @@ class WorkoutService {
 		try {
 			$db->beginTransaction();
 			
-			// find or insert the q
-			$q = $this->memberService->getOrAddMember($additionalInfo->q);
-			
 			// insert the workout
-			$workoutId = $this->workoutRepo->save($data->post->title, $additionalInfo->date, $q->getMemberId(), $data->post->url);
+			$workoutId = $this->workoutRepo->save($data->post->title, $additionalInfo->date, $data->post->url);
 			
 			// add the aos
 			$this->saveWorkoutAos($workoutId, $additionalInfo->tags);
+			
+			// add the qs
+			$this->saveWorkoutQs($workoutId, $additionalInfo->q);
 			
 			// add the pax members
 			$this->saveWorkoutMembers($workoutId, $additionalInfo->pax);
@@ -134,17 +136,20 @@ class WorkoutService {
 		try {
 			$db->beginTransaction();
 			
-			// find or insert the q
-			$q = $this->memberService->getOrAddMember($additionalInfo->q);
-			
 			// update the workout
-			$this->workoutRepo->update($workoutId, $workout->getTitle(), $q->getMemberId(), $workout->getBackblastUrl());
+			$this->workoutRepo->update($workoutId, $workout->getTitle(), $workout->getBackblastUrl());
 			
 			// delete previous aos
 			$this->workoutRepo->deleteWorkoutAos($workoutId);
 			
 			// add the aos
 			$this->saveWorkoutAos($workoutId, $additionalInfo->tags);
+			
+			// delete the previous qs
+			$this->workoutRepo->deleteWorkoutQs($workoutId);
+			
+			// add the qs
+			$this->saveWorkoutQs($workoutId, $additionalInfo->q);
 			
 			// delete the previous members
 			$this->workoutRepo->deleteWorkoutMembers($workoutId);
@@ -173,9 +178,15 @@ class WorkoutService {
 		}
 		$workoutObj->setAo($aoArray);
 		
+		$qArray = array();
+		// only add the Q if it exists
+		if (!is_null($workout['Q_ID'])) {
+			$qArray[$workout['Q_ID']] = $workout['Q'];
+		}
+		$workoutObj->setQ($qArray);
+		
 		$workoutObj->setBackblastUrl($workout['BACKBLAST_URL']);
 		$workoutObj->setPaxCount($workout['PAX_COUNT']);
-		$workoutObj->setQ($workout['Q']);
 		$workoutObj->setTitle($workout['TITLE']);
 		$workoutObj->setWorkoutId($workout['WORKOUT_ID']);
 		$workoutObj->setWorkoutDate($workout['WORKOUT_DATE']);
@@ -185,8 +196,21 @@ class WorkoutService {
 	
 	private function addAoToWorkout($workout, $aoId, $aoDescription) {
 		$aoArray = $workout->getAo();
-		$aoArray[$aoId] = $aoDescription;
-		$workout->setAo($aoArray);
+		
+		if (!array_key_exists($aoId, $aoArray)) {
+			$aoArray[$aoId] = $aoDescription;
+			$workout->setAo($aoArray);
+		}
+		
+		return $workout;
+	}
+	
+	private function addQToWorkout($workout, $qId, $qName) {
+		$qArray = $workout->getQ();
+		if (!array_key_exists($qId, $qArray)) {
+			$qArray[$qId] = $qName;
+			$workout->setQ($qArray);
+		}
 		
 		return $workout;
 	}
@@ -205,6 +229,12 @@ class WorkoutService {
 		}
 	}
 	
+	private function saveWorkoutQs($workoutId, $qs) {
+		foreach ($qs as $q) {
+			$member = $this->memberService->getOrAddMember($q);
+			$this->workoutRepo->saveWorkoutQ($workoutId, $member->getMemberId());
+		}
+	}
 }
 
 ?>

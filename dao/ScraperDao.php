@@ -39,6 +39,9 @@ class ScraperDao {
 		// query to get the Q
 		$qNode = $xpath->query("//ul/li/strong[text()='QIC:']")->item(0);
 		$qStr = trim($qNode->nextSibling->nodeValue);
+		$split = preg_split("/,|\band\b/", $qStr);
+		// trim values and remove empty values from the array
+		$qArray = array_filter(array_map('trim', $split));
 		
 		// query to get the PAX
 		$paxNode = $xpath->query("//ul/li/strong[text()='The PAX:']")->item(0);
@@ -55,7 +58,7 @@ class ScraperDao {
 		}
 		
 		// create an object to return;
-		return (object) array('q' => $qStr, 'pax' => $paxArray, 'tags' => $tagsArray, 'date' => $date);
+		return (object) array('q' => $qArray, 'pax' => $paxArray, 'tags' => $tagsArray, 'date' => $date);
 	}
 }
 ?>

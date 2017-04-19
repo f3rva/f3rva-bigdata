@@ -94,6 +94,17 @@ class WorkoutRepository {
 		return $stmt->fetch();
 	}
 	
+	public function findWorkoutQ($workoutId, $memberId) {
+		$stmt = $this->db->prepare('
+			select wq.WORKOUT_ID, wq.MEMBER_ID, m.F3_NAME from WORKOUT_Q wq
+				join MEMBER m on wq.MEMBER_ID = m.MEMBER_ID
+				where wq.WORKOUT_ID=? and wq.MEMBER_ID=?;
+		');
+		$stmt->execute([$workoutId, $memberId]);
+		
+		return $stmt->fetch();
+	}
+	
 	public function save($title, $dateArray, $url) {
 		$stmt = $this->db->prepare('
 			insert into WORKOUT(TITLE, WORKOUT_DATE, BACKBLAST_URL) values (?, ?, ?)
@@ -117,7 +128,7 @@ class WorkoutRepository {
 	}
 	
 	public function saveWorkoutQ($workoutId, $memberId) {
-		if (!$this->findWorkoutMember($workoutId, $memberId)) {
+		if (!$this->findWorkoutQ($workoutId, $memberId)) {
 			$stmt = $this->db->prepare('
 				insert into WORKOUT_Q(WORKOUT_ID, MEMBER_ID) values (?, ?)
 			');

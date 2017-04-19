@@ -137,7 +137,7 @@ class WorkoutService {
 			$db->beginTransaction();
 			
 			// update the workout
-			$this->workoutRepo->update($workoutId, $workout->getTitle(), $workout->getBackblastUrl());
+			$this->workoutRepo->update($workoutId, $workout->getTitle(), $additionalInfo->date, $workout->getBackblastUrl());
 			
 			// delete previous aos
 			$this->workoutRepo->deleteWorkoutAos($workoutId);
@@ -156,7 +156,7 @@ class WorkoutService {
 			
 			// add the pax members
 			$this->saveWorkoutMembers($workoutId, $additionalInfo->pax);
-			
+
 			$db->commit();
 		}
 		catch (\Exception $e) {

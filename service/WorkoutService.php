@@ -54,6 +54,9 @@ class WorkoutService {
 				if (!is_null($workout['AO_ID'])) {
 					$existingWorkout = $workoutsArray[$workoutId];
 					$existingWorkout = $this->addAoToWorkout($existingWorkout, $workout['AO_ID'], $workout['AO']);
+				}
+				if (!is_null($workout['Q_ID'])) {
+					$existingWorkout = $workoutsArray[$workoutId];
 					$existingWorkout = $this->addQToWorkout($existingWorkout, $workout['Q_ID'], $workout['Q']);
 				}
 			}

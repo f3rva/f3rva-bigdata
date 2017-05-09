@@ -17,7 +17,8 @@
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Reports <span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a href="#">TBD</a></li>
+            <li><a href="/report/dayOfWeek.php">Day of Week</a></li>
+            <li><a href="/report/ao.php">AO</a></li>
           </ul>
         </li>
       </ul>

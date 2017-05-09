@@ -76,7 +76,7 @@ class WorkoutRepository {
 		$stmt = $this->db->prepare('
 			select wp.WORKOUT_ID, wp.MEMBER_ID, m.F3_NAME from WORKOUT_PAX wp
 				join MEMBER m on wp.MEMBER_ID = m.MEMBER_ID
-				where wp.WORKOUT_ID=?;
+				where wp.WORKOUT_ID=?
 		');
 		$stmt->execute([$id]);
 		
@@ -87,7 +87,7 @@ class WorkoutRepository {
 		$stmt = $this->db->prepare('
 			select wp.WORKOUT_ID, wp.MEMBER_ID, m.F3_NAME from WORKOUT_PAX wp
 				join MEMBER m on wp.MEMBER_ID = m.MEMBER_ID
-				where wp.WORKOUT_ID=? and wp.MEMBER_ID=?;
+				where wp.WORKOUT_ID=? and wp.MEMBER_ID=?
 		');
 		$stmt->execute([$workoutId, $memberId]);
 		
@@ -98,11 +98,74 @@ class WorkoutRepository {
 		$stmt = $this->db->prepare('
 			select wq.WORKOUT_ID, wq.MEMBER_ID, m.F3_NAME from WORKOUT_Q wq
 				join MEMBER m on wq.MEMBER_ID = m.MEMBER_ID
-				where wq.WORKOUT_ID=? and wq.MEMBER_ID=?;
+				where wq.WORKOUT_ID=? and wq.MEMBER_ID=?
 		');
 		$stmt->execute([$workoutId, $memberId]);
 		
 		return $stmt->fetch();
+	}
+	
+	public function findWorkoutsGroupByDayOfWeek($startDate, $endDate) {
+		$sql = '
+			select DAYOFWEEK(w.WORKOUT_DATE) as DAY_ID, count(wp.MEMBER_ID) as PAX_COUNT from WORKOUT w
+			join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
+		';
+		
+		$hasDates = !empty($startDate) && !empty($endDate);
+		if ($hasDates) {
+			$sql = $sql . '
+				where w.WORKOUT_DATE between ? and ?
+			';
+		}
+		
+		$sql = $sql . '
+			group by DAYOFWEEK(w.WORKOUT_DATE)
+		';
+		$stmt = $this->db->prepare($sql);
+		
+		if ($hasDates) {
+			$stmt->execute([$startDate, $endDate]);
+		}
+		else {
+			$stmt->execute();
+		}
+		
+		return $stmt->fetchAll();			
+	}
+	
+	public function findAverageAttendanceByAO($startDate, $endDate) {
+		$sql = '
+			select wc.AO_ID, wc.DESCRIPTION, avg(wc.count) as AVERAGE from (
+				select wa.AO_ID, ao.DESCRIPTION, count(*) as count from WORKOUT_PAX wp
+				join WORKOUT_AO wa on wp.WORKOUT_ID = wa.WORKOUT_ID
+			    join AO ao on wa.AO_ID = ao.AO_ID
+			    join WORKOUT w on wa.WORKOUT_ID = w.WORKOUT_ID
+		';
+		
+		$hasDates = !empty($startDate) && !empty($endDate);
+		if ($hasDates) {
+			$sql = $sql . '
+				where w.WORKOUT_DATE between ? and ?
+			';
+		}
+		
+		$sql = $sql . '
+				group by wp.WORKOUT_ID, wa.AO_ID
+			    order by AO_ID asc
+			) wc
+			group by wc.AO_ID, wc.DESCRIPTION;
+		';
+		
+		$stmt = $this->db->prepare($sql);
+		
+		if ($hasDates) {
+			$stmt->execute([$startDate, $endDate]);
+		}
+		else {
+			$stmt->execute();
+		}
+		
+		return $stmt->fetchAll();
 	}
 	
 	public function save($title, $dateArray, $url) {

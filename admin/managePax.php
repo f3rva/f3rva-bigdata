@@ -83,6 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				<button type="submit" class="btn btn-default">Create Alias</button>
 			</form>
 		</div>
+		<!-- 
 		<div class="col-md-3">
 			<form method="post" action="managePax.php">
 				<input type="hidden" name="action" value="split" />
@@ -91,9 +92,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 					<input type="text" name="memberId" class="form-control" id="memberId" placeholder="ID">
 					<p class="help-block">ID of the member to split</p>
 				</div>
+				<div class="form-group">
+					<label for="childIds">ID</label>
+					<input type="text" name="childIds" class="form-control" id="childIds" placeholder="1,2,3">
+					<p class="help-block">Comma separated list of IDs to split into</p>
+				</div>
 				<button type="submit" class="btn btn-default">Split</button>
 			</form>
 		</div>
+		-->
 	</div>
 </div>
 

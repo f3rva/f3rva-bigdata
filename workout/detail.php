@@ -47,7 +47,7 @@ use F3\Service\WorkoutService;
 <?
     foreach ($detail->getPax() as $pax) {
 ?>
-    <tr><td><?= $pax->getF3Name() ?></td></tr>
+    <tr><td><a href="/member/detail.php?id=<?= $pax->getMemberId() ?>"><?= $pax->getF3Name() ?></a></td></tr>
 <?
     }
 ?>

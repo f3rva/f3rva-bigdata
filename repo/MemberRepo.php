@@ -23,6 +23,16 @@ class MemberRepository {
 		return $stmt->fetchAll();
 	}
 	
+	public function find($memberId) {
+		$stmt = $this->db->prepare('
+			select m.MEMBER_ID, m.F3_NAME from MEMBER m
+			where m.MEMBER_ID=?
+		');
+		$stmt->execute([$memberId]);
+		
+		return $stmt->fetch();
+	}
+	
 	/**
 	 * Finds a member by the f3name in the member table or the alias table if available
 	 */
@@ -35,8 +45,7 @@ class MemberRepository {
 		$upperName = strtoupper($f3name);
 		$stmt->execute([$upperName, $upperName]);
 		
-		$result = $stmt->fetch();
-		return $result;
+		return $stmt->fetch();
 	}
 	
 	public function findExistingAlias($memberId, $associatedMemberId) {
@@ -48,6 +57,29 @@ class MemberRepository {
 		$stmt->execute([$memberId, $associatedMemberId]);
 		
 		return $stmt->fetch();
+	}
+	
+	public function findDuplicateWorkoutMembers($memberId, $associatedMemberId) {
+		$stmt = $this->db->prepare('
+			select wp.WORKOUT_ID, wp.NUM from 
+				(select WORKOUT_ID, count(MEMBER_ID) as NUM from WORKOUT_PAX 
+					where MEMBER_ID in (?, ?)
+				group by WORKOUT_ID) wp
+			where wp.NUM > 1;
+		');
+		$stmt->execute([$memberId, $associatedMemberId]);
+		
+		return $stmt->fetchAll();
+	}
+	
+	public function findAliases($memberId) {
+		$stmt = $this->db->prepare('
+			select ma.MEMBER_ID, ma.F3_ALIAS from MEMBER_ALIAS ma
+				where ma.MEMBER_ID=?
+		');
+		$stmt->execute([$memberId]);
+		
+		return $stmt->fetchAll();
 	}
 	
 	/**
@@ -112,6 +144,15 @@ class MemberRepository {
 		');
 		
 		$stmt->execute([$memberId, $associatedMemberId]);
+	}
+	
+	public function removeMemberFromWorkout($workoutId, $associatedMemberId) {
+		$stmt = $this->db->prepare('
+			delete from WORKOUT_PAX
+				where WORKOUT_ID=? and MEMBER_ID=?
+		');
+		
+		$stmt->execute([$workoutId, $associatedMemberId]);
 	}
 }
 

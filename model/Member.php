@@ -4,6 +4,7 @@ namespace F3\Model;
 class Member {
 	private $memberId;
 	private $f3Name;
+	private $aliases;
 	
 	public function getMemberId() {
 		return $this->memberId;
@@ -19,6 +20,14 @@ class Member {
 	
 	public function setF3Name($f3Name) {
 		$this->f3Name = $f3Name;
+	}
+	
+	public function getAliases() {
+		return $this->aliases;
+	}
+	
+	public function setAliases($aliases) {
+		$this->aliases = $aliases;
 	}
 }
 

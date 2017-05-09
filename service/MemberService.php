@@ -40,9 +40,28 @@ class MemberService {
 		$memberResult = $this->memberRepo->findByF3NameOrAlias($name);
 		$member = null;
 		
+		if ($memberResult) {
+			$member = $this->createMember($memberResult['MEMBER_ID'], $memberResult['F3_NAME']);
+		}
+		
+		return $member;
+	}
+	
+	public function getMemberById($memberId) {
+		$memberResult = $this->memberRepo->find($memberId);
+		$aliases = $this->memberRepo->findAliases($memberId);
+		$member = null;
 		
 		if ($memberResult) {
 			$member = $this->createMember($memberResult['MEMBER_ID'], $memberResult['F3_NAME']);
+			
+			$aliasArray = array();
+			if ($aliases) {
+				foreach($aliases as $alias) {
+					$aliasArray[$alias['F3_ALIAS']] = $alias['F3_ALIAS'];
+				}
+			}
+			$member->setAliases($aliasArray);
 		}
 		
 		return $member;
@@ -67,6 +86,12 @@ class MemberService {
 			// create the alias if it doesn't already exist
 			if (!$this->memberRepo->findExistingAlias($memberId, $associatedMemberId)) {
 				$this->memberRepo->createAlias($memberId, $associatedMemberId);
+			}
+			
+			// remove any duplicate members from workouts (the bleeder effect)
+			$dupResult = $this->memberRepo->findDuplicateWorkoutMembers($memberId, $associatedMemberId);
+			foreach ($dupResult as $dup) {
+				$this->memberRepo->removeMemberFromWorkout($dup['WORKOUT_ID'], $associatedMemberId);
 			}
 			
 			// re-link workout pax records

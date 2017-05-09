@@ -70,15 +70,7 @@ class ReportService {
 	}
 	
 	public function getDefaultDate($date) {
-		date_default_timezone_set('America/New_York');
-		
-		$dateDefault = $date;
-		if (empty($date)) {
-			$now = new \DateTime();
-			$dateDefault = $now->format('Y-m-d');
-		}
-		
-		return $dateDefault;
+		return $this->getDefaultDateSubtractInterval($date, 'P0M');
 	}
 
 	public function getDefaultDateSubtractInterval($date, $dateInterval) {

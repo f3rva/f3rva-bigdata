@@ -21,7 +21,7 @@ use F3\Service\ReportService;
 <?
 	$reportService = new ReportService();
 	$startDate = $reportService->getDefaultDateSubtractInterval($_REQUEST['startDate'], 'P1M');
-	$endDate= $reportService->getDefaultDateSubtractInterval($_REQUEST['endDate'], 'P0M');
+	$endDate= $reportService->getDefaultDate($_REQUEST['endDate']);
 	
 	$aoAverages = $reportService->getAverageAttendanceByAO($startDate, $endDate);
 ?>

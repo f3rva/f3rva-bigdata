@@ -6,13 +6,13 @@ if (!defined('__ROOT__')) {
 }
 require_once(__ROOT__ . '/model/DayOfWeek.php');
 require_once(__ROOT__ . '/model/Summary.php');
+require_once(__ROOT__ . '/repo/MemberRepo.php');
 require_once(__ROOT__ . '/repo/WorkoutRepo.php');
-require_once(__ROOT__ . '/service/MemberService.php');
 
 use F3\Model\DayOfWeek;
 use F3\Model\Summary;
+use F3\Repo\MemberRepository;
 use F3\Repo\WorkoutRepository;
-use F3\Service\MemberService;
 
 /**
  * Service class for all reporting.
@@ -20,9 +20,11 @@ use F3\Service\MemberService;
  * @author bbischoff
  */
 class ReportService {
+	private $memberRepo;
 	private $workoutRepo;
 
 	public function __construct() {
+		$this->memberRepo = new MemberRepository();
 		$this->workoutRepo = new WorkoutRepository();
 	}
 
@@ -67,6 +69,40 @@ class ReportService {
 		}
 		
 		return $aoArray;
+	}
+	
+	public function getPAXAttendance($startDate, $endDate) {
+		$paxTotals = $this->memberRepo->findPAXAttendance($startDate, $endDate);
+		
+		$totalsArray = array();
+		
+		foreach ($paxTotals as $total) {
+			$summary = new Summary();
+			$summary->setValue($total['COUNT']);
+			$summary->setId($total['MEMBER_ID']);
+			$summary->setDescription($total['F3_NAME']);
+			
+			array_push($totalsArray, $summary);
+		}
+		
+		return $totalsArray;
+	}
+	
+	public function getQTotals($startDate, $endDate) {
+		$paxTotals = $this->memberRepo->findQTotals($startDate, $endDate);
+		
+		$totalsArray = array();
+		
+		foreach ($paxTotals as $total) {
+			$summary = new Summary();
+			$summary->setValue($total['COUNT']);
+			$summary->setId($total['MEMBER_ID']);
+			$summary->setDescription($total['F3_NAME']);
+			
+			array_push($totalsArray, $summary);
+		}
+		
+		return $totalsArray;
 	}
 	
 	public function getDefaultDate($date) {

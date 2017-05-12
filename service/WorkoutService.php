@@ -41,28 +41,14 @@ class WorkoutService {
 	 */
 	public function getWorkouts() {
 		$workouts = $this->workoutRepo->findAll();
-		$workoutsArray = array();
 		
-		foreach ($workouts as $workout) {
-			$workoutId = $workout['WORKOUT_ID'];
-			if (is_null($workoutsArray[$workoutId])) {
-				$workoutObj = $this->createWorkoutObj($workout);
-				$workoutsArray[$workoutObj->getWorkoutId()] = $workoutObj;
-			}
-			else {
-				// we already have the workout details, just add the duplicate info
-				if (!is_null($workout['AO_ID'])) {
-					$existingWorkout = $workoutsArray[$workoutId];
-					$existingWorkout = $this->addAoToWorkout($existingWorkout, $workout['AO_ID'], $workout['AO']);
-				}
-				if (!is_null($workout['Q_ID'])) {
-					$existingWorkout = $workoutsArray[$workoutId];
-					$existingWorkout = $this->addQToWorkout($existingWorkout, $workout['Q_ID'], $workout['Q']);
-				}
-			}
-		}
+		return $this->processWorkoutResults($workouts);
+	}
+	
+	public function getWorkoutsByAo($aoId) {
+		$workouts = $this->workoutRepo->findAllByAo($aoId);
 		
-		return $workoutsArray;
+		return $this->processWorkoutResults($workouts);
 	}
 	
 	public function getWorkout($workoutId) {
@@ -171,6 +157,30 @@ class WorkoutService {
 		return $workoutId;
 	}
 	
+	private function processWorkoutResults($workouts) {
+		$workoutsArray = array();
+		
+		foreach ($workouts as $workout) {
+			$workoutId = $workout['WORKOUT_ID'];
+			if (is_null($workoutsArray[$workoutId])) {
+				$workoutObj = $this->createWorkoutObj($workout);
+				$workoutsArray[$workoutObj->getWorkoutId()] = $workoutObj;
+			}
+			else {
+				// we already have the workout details, just add the duplicate info
+				if (!is_null($workout['AO_ID'])) {
+					$existingWorkout = $workoutsArray[$workoutId];
+					$existingWorkout = $this->addAoToWorkout($existingWorkout, $workout['AO_ID'], $workout['AO']);
+				}
+				if (!is_null($workout['Q_ID'])) {
+					$existingWorkout = $workoutsArray[$workoutId];
+					$existingWorkout = $this->addQToWorkout($existingWorkout, $workout['Q_ID'], $workout['Q']);
+				}
+			}
+		}
+		
+		return $workoutsArray;
+	}
 	private function createWorkoutObj($workout) {
 		$workoutObj = new Workout();
 		

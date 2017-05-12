@@ -72,6 +72,56 @@ class WorkoutRepository {
 		return $stmt->fetchAll();
 	}
 
+	public function findAllByAo($aoId) {
+		$stmt = $this->db->prepare('
+			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
+				left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
+				left outer join WORKOUT_Q wq on w.WORKOUT_ID = wq.WORKOUT_ID
+				left outer join MEMBER mq on wq.MEMBER_ID = mq.MEMBER_ID
+				left outer join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
+				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
+				left outer join AO ao on wao.AO_ID = ao.AO_ID
+				where ao.AO_ID = ?
+				group by w.WORKOUT_ID, ao.AO_ID, mq.MEMBER_ID, ao.DESCRIPTION
+				order by w.WORKOUT_DATE desc, ao.DESCRIPTION asc
+		');
+		$stmt->execute([$aoId]);
+		
+		return $stmt->fetchAll();
+	}
+	
+	public function findCount($startDate, $endDate) {
+		$sql = '
+			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
+				left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
+				left outer join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
+				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
+				left outer join AO ao on wao.AO_ID = ao.AO_ID
+		';
+		
+		$hasDates = !empty($startDate) && !empty($endDate);
+		if ($hasDates) {
+			$sql = $sql . '
+				where w.WORKOUT_DATE between ? and ?
+			';
+		}
+		
+		$sql = $sql . '
+				group by w.WORKOUT_ID, ao.AO_ID, ao.DESCRIPTION
+				order by w.WORKOUT_DATE desc, ao.DESCRIPTION asc
+		';
+		$stmt = $this->db->prepare($sql);
+		
+		if ($hasDates) {
+			$stmt->execute([$startDate, $endDate]);
+		}
+		else {
+			$stmt->execute();
+		}
+		
+		return $stmt->fetchAll();
+	}
+	
 	public function findPax($id) {
 		$stmt = $this->db->prepare('
 			select wp.WORKOUT_ID, wp.MEMBER_ID, m.F3_NAME from WORKOUT_PAX wp

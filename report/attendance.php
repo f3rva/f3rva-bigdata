@@ -30,7 +30,7 @@ use F3\Service\ReportService;
 <div class="container-fluid">
 	<div class="row">
 		<div class="col col-sm-3">
-			<form method="get" action="ao.php">
+			<form method="get" action="attendance.php">
 				<div class="form-group row">
 					<label class="col-md-4 col-form-label" for="startDate">Start</label>
 					<div class="col-md-8">
@@ -46,11 +46,11 @@ use F3\Service\ReportService;
 				<button type="submit" class="btn btn-default">Filter</button>
 			</form>
 		</div>
-		<div class="col col-sm-3">
+		<div class="col col-sm-4">
 			<table class="table table-striped">
 				<tr>
 					<th>Name</th>
-					<th>Number of Workouts</th>
+					<th># Workouts</th>
 				</tr>
 			<?	
 			foreach ($attendance as $summary) {
@@ -64,11 +64,11 @@ use F3\Service\ReportService;
 			?>
 			</table>
 		</div>
-		<div class="col col-sm-3">
+		<div class="col col-sm-4">
 			<table class="table table-striped">
 				<tr>
 					<th>Name</th>
-					<th>Number of Qs</th>
+					<th># Qs</th>
 				</tr>
 			<?	
 			foreach ($qs as $summary) {

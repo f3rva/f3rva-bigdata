@@ -80,13 +80,16 @@ class ReportService {
 		$labels = array();
 		$series = array();
 		
-		array_push($labels, 'Day');
-		array_push($series, array());
-		array_push($series[0], $aoId);
+		// lookup the AO name
+		$ao = $this->workoutRepo->findAo($aoId);
+		array_push($labels, $ao['DESCRIPTION']);
+		
 		foreach (array_reverse($workouts) as $workout) {
+			$dateArray = array();
 			$date = new \DateTime($workout->getWorkoutDate());
-			array_push($labels, $date->format('n/j'));
-			array_push($series[0], $workout->getPaxCount());
+			array_push($dateArray, $date->format("'n/j'"));
+			array_push($dateArray, $workout->getPaxCount());
+			array_push($series, $dateArray);
 		}
 		
 		$chartData->setXLabels($labels);

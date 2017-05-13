@@ -3,3 +3,7 @@
 body { 
 	padding-top: 60px; 
 }
+
+div#chartContainer {
+    padding-bottom: 30px;
+}

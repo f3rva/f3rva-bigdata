@@ -91,8 +91,9 @@ use F3\Service\WorkoutService;
 	
 		function drawChart() {
 			var data = new google.visualization.DataTable();
+			data.addColumn('string', 'Day');
 			<? foreach ($chartData->getXLabels() as $label) { ?>
-				data.addColumn('string', '<?= $label ?>');
+				data.addColumn('number', '<?= $label ?>');
 			<? } ?>
 
 			data.addRows([
@@ -100,13 +101,15 @@ use F3\Service\WorkoutService;
 			]);
 	
 			var options = {
+				animation: {
+					duration: 800,
+					startup: true
+				},
 				hAxis: {
-					title: 'Date',
-					logScale: true
+					title: 'Date'
 				},
 				vAxis: {
-					title: 'Number',
-					logScale: false
+					title: 'Attendance'
 				},
 				colors: ['#a52714', '#097138'],
 				interpolateNulls: true

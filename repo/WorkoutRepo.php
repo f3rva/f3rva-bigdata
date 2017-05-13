@@ -155,6 +155,15 @@ class WorkoutRepository {
 		return $stmt->fetch();
 	}
 	
+	public function findAo($aoId) {
+		$stmt = $this->db->prepare('
+			select AO_ID, DESCRIPTION from AO where AO_ID=?
+		');
+		$stmt->execute([$aoId]);
+		
+		return $stmt->fetch();
+	}
+	
 	public function findWorkoutsGroupByDayOfWeek($startDate, $endDate) {
 		$sql = '
 			select DAYOFWEEK(w.WORKOUT_DATE) as DAY_ID, count(wp.MEMBER_ID) as PAX_COUNT from WORKOUT w

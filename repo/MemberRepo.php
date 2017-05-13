@@ -142,7 +142,7 @@ class MemberRepository {
 		return $stmt->fetchAll();
 	}
 	
-/**
+	/**
 	 * Inserts the user into the database and returns the id of the inserted member
 	 */
 	public function save($name) {

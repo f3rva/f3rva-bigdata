@@ -5,8 +5,10 @@ if (!defined('__ROOT__')) {
 	define('__ROOT__', dirname(dirname(__FILE__)));
 }
 require_once(__ROOT__ . '/service/ReportService.php');
+require_once(__ROOT__ . '/service/WorkoutService.php');
 
 use F3\Service\ReportService;
+use F3\Service\WorkoutService;
 ?>
 
 <!DOCTYPE html>
@@ -20,11 +22,12 @@ use F3\Service\ReportService;
 
 <?
 	$reportService = new ReportService();
-	$startDate = $reportService->getDefaultDateSubtractInterval($_REQUEST['startDate'], 'P1M');
-	$endDate= $reportService->getDefaultDate($_REQUEST['endDate']);
+	$workoutService = new WorkoutService();
+	$aoId = $_REQUEST['id'];
 	
-	$aoAverages = $reportService->getAverageAttendanceByAO($startDate, $endDate);
-	$chartData = $reportService->getWorkoutCountsChartData($startDate, $endDate);
+	$workouts = $workoutService->getWorkoutsByAo($aoId);
+	$aoAverages = $reportService->getAverageAttendanceByAO(null, null);
+	$chartData = $reportService->getAoDetailChartData($aoId, $workouts);
 ?>
 
 <div class="container-fluid">
@@ -35,34 +38,39 @@ use F3\Service\ReportService;
 	</div>
 	<div class="row">
 		<div class="col col-sm-3">
-			<form method="get" action="ao.php">
-				<div class="form-group row">
-					<label class="col-md-4 col-form-label" for="startDate">Start</label>
-					<div class="col-md-8">
-						<input type="date" name="startDate" class="form-control" id="startDate" value="<?= $startDate ?>">
-					</div>
-				</div>
-				<div class="form-group row">
-					<label class="col-md-4 col-form-label" for="endDate">End</label>
-					<div class="col-md-8">
-						<input type="date" name="endDate" class="form-control" id="endDate" value="<?= $endDate ?>">
-					</div>
-				</div>
-				<button type="submit" class="btn btn-default">Filter</button>
-			</form>
-		</div>
-		<div class="col col-sm-3">
 			<table class="table table-striped">
 				<tr>
 					<th>AO</th>
 					<th>Average Attendance</th>
 				</tr>
+				<tr>
+					<td><?= $aoAverages[$aoId]->getDescription() ?></td>
+					<td><?= $aoAverages[$aoId]->getValue() ?></td>
+				</tr>
+			</table>
+		</div>
+		<div class="col col-sm-9">
+			<table class="table table-striped">
+				<tr>
+					<th>Workout Date</th>
+					<th>Backblast Title</th>
+					<th>Q</th>
+					<th># PAX</th>
+				</tr>
 			<?	
-			foreach ($aoAverages as $ao) {
+				foreach ($workouts as $workout) {
 			?>
 				<tr>
-					<td><?= $ao->getDescription() ?></td>
-					<td><?= $ao->getValue() ?></td>
+					<td><?= $workout->getWorkoutDate() ?></td>
+					<td><a href="<?= $workout->getBackblastUrl() ?>" target="_blank"><?= $workout->getTitle() ?></a></td>
+					<td>
+			        	<ul class="list-unstyled">
+			        	<? foreach ($workout->getQ() as $q) { ?>
+			        		<li><?= $q ?></li>
+			        	<? } ?>
+			        	</ul>
+					</td>
+					<td><a href="/workout/detail.php?id=<?= $workout->getWorkoutId() ?>"><?= $workout->getPaxCount() ?></a></td>
 				</tr>
 			<?
 				}
@@ -87,19 +95,21 @@ use F3\Service\ReportService;
 			<? foreach ($chartData->getXLabels() as $label) { ?>
 				data.addColumn('number', '<?= $label ?>');
 			<? } ?>
-			
+
 			data.addRows([
 				<?= $chartData->getSeriesImploded() ?>
 			]);
 	
 			var options = {
+				animation: {
+					duration: 800,
+					startup: true
+				},
 				hAxis: {
-					title: 'Time',
-					logScale: true
+					title: 'Date'
 				},
 				vAxis: {
-					title: 'Popularity',
-					logScale: false
+					title: 'Attendance'
 				},
 				colors: ['#a52714', '#097138'],
 				interpolateNulls: true

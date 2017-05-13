@@ -39,8 +39,8 @@ use F3\Service\WorkoutService;
 		<td><a href="<?= $workout->getBackblastUrl() ?>" target="_blank"><?= $workout->getTitle() ?></a></td>
 		<td>
 			<ul class="list-unstyled">
-			<? foreach ($workout->getAo() as $ao) { ?>
-				<li><?= $ao ?></li>
+			<? foreach ($workout->getAo() as $aoId => $ao) { ?>
+				<li><a href="/ao/detail.php?id=<?= $aoId ?>"><?= $ao ?></a></li>
 			<? } ?>
 			</ul>
 		</td>

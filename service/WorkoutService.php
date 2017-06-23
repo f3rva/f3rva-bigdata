@@ -157,6 +157,34 @@ class WorkoutService {
 		return $workoutId;
 	}
 	
+	public function deleteWorkout($workoutId) {		
+		$db = Database::getInstance()->getDatabase();
+		try {
+			$db->beginTransaction();
+			
+			// delete previous aos
+			$this->workoutRepo->deleteWorkoutAos($workoutId);
+			
+			// delete the previous qs
+			$this->workoutRepo->deleteWorkoutQs($workoutId);
+
+			// delete the previous members
+			$this->workoutRepo->deleteWorkoutMembers($workoutId);
+
+			// delete the workout
+			$this->workoutRepo->deleteWorkout($workoutId);
+			
+			$db->commit();
+		}
+		catch (\Exception $e) {
+			$db->rollBack();
+			error_log($e);
+			throw $e;
+		}
+		
+		return $workoutId;
+	}
+	
 	private function processWorkoutResults($workouts) {
 		$workoutsArray = array();
 		

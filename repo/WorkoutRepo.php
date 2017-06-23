@@ -41,6 +41,14 @@ class WorkoutRepository {
 		$stmt->execute([$workoutId]);
 	}
 	
+	public function deleteWorkout($workoutId) {
+		$stmt = $this->db->prepare('
+			delete from WORKOUT
+				where WORKOUT_ID=?
+		');
+		$stmt->execute([$workoutId]);
+	}
+	
 	public function find($id) {
 		$stmt = $this->db->prepare('
 			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q from WORKOUT w

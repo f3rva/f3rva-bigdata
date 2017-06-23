@@ -1,3 +1,17 @@
+<?php 
+namespace F3;
+
+if (!defined('__ROOT__')) {
+	define('__ROOT__', dirname(__FILE__));
+}
+
+require_once(__ROOT__ . '/service/AuthenticationService.php');
+
+use F3\Service\AuthenticationService;
+
+$authService = new AuthenticationService();
+?>
+
 <nav class="navbar navbar-default navbar-fixed-top">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -24,6 +38,14 @@
         </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
+      <? if (!$authService->loggedIn()) { ?>
+        <li><a href="/login.php">Login</a></li>
+      <? } else { ?>
+        <li><a href="/logout.php">Logout</a></li>
+      <? } ?>
+      </ul>
+      <? if ($authService->loggedIn()) { ?>
+      <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin <span class="caret"></span></a>
           <ul class="dropdown-menu">
@@ -31,6 +53,7 @@
           </ul>
         </li>
       </ul>
+      <? } ?>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>

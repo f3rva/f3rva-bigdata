@@ -4,6 +4,7 @@ namespace F3;
 if (!defined('__ROOT__')) {
 	define('__ROOT__', dirname(dirname(__FILE__)));
 }
+require_once(__ROOT__ . '/include/init.php');
 require_once(__ROOT__ . '/service/ReportService.php');
 require_once(__ROOT__ . '/service/WorkoutService.php');
 

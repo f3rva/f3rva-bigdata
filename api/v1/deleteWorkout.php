@@ -12,15 +12,13 @@ function init_response() {
 }
 
 function validateInput() {
-	// parse the input into json
-	$jsonStr = file_get_contents('php://input');
-	$json = json_decode($jsonStr);
+	$workoutId = $_REQUEST['workoutId'];
 	
-	if ($json == null) {
-		exit_error(400, 5400, "invalid input received: " . $jsonStr);
+	if (empty($workoutId)) {
+		exit_error(400, 5400, "invalid input received: " . $workoutId);
 	}
 	
-	return $json;
+	return $workoutId;
 }
 
 function exit_error($status, $code, $message) {
@@ -30,13 +28,13 @@ function exit_error($status, $code, $message) {
     exit(0);
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'PUT') {	
+if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {	
 	init_response();
-	$data = validateInput();
+	$workoutId = validateInput();
 	
 	$workoutService = new WorkoutService();
-	$workout = $workoutService->refreshWorkout($data->workoutId);
-
+	$workout = $workoutService->deleteWorkout($workoutId);
+	
 	echo json_encode(array(), JSON_FORCE_OBJECT);
 }
 ?>

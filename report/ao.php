@@ -61,7 +61,7 @@ use F3\Service\ReportService;
 			foreach ($aoAverages as $ao) {
 			?>
 				<tr>
-					<td><?= $ao->getDescription() ?></td>
+					<td><a href="/ao/detail.php?id=<?= $ao->getId() ?>"><?= $ao->getDescription() ?></a></td>
 					<td><?= $ao->getValue() ?></td>
 				</tr>
 			<?

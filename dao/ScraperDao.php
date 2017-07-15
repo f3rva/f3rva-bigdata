@@ -51,7 +51,7 @@ class ScraperDao {
 		$paxArray = array_filter(array_map('trim', $split));
 		
 		// query to get the tags
-		$tags = $xpath->query('//div[@class="categories"]/a[@rel="tag"]/text()');
+		$tags = $xpath->query('//span[@class="cats tagcloud"]/a[@rel="tag"]/text()');
 		$tagsArray = array();
 		foreach($tags as $tagNode){
 			$tagsArray[] = $tagNode->nodeValue;

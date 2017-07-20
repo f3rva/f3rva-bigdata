@@ -46,8 +46,8 @@ use F3\Service\WorkoutService;
 		</td>
 		<td>
         	<ul class="list-unstyled">
-        	<? foreach ($workout->getQ() as $q) { ?>
-        		<li><?= $q ?></li>
+        	<? foreach ($workout->getQ() as $qId => $q) { ?>
+        		<li><a href="/member/detail.php?id=<?= $qId ?>"><?= $q ?></a></li>
         	<? } ?>
         	</ul>
 		</td>

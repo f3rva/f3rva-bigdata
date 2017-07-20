@@ -51,6 +51,18 @@ class WorkoutService {
 		return $this->processWorkoutResults($workouts);
 	}
 	
+	public function getWorkoutsByQ($qId) {
+		$workouts = $this->workoutRepo->findAllByQ($qId);
+		
+		return $this->processWorkoutResults($workouts);
+	}
+	
+	public function getWorkoutsByPax($paxId) {
+		$workouts = $this->workoutRepo->findAllByPax($paxId);
+		
+		return $this->processWorkoutResults($workouts);
+	}
+	
 	public function getWorkout($workoutId) {
 		$details = $this->workoutRepo->find($workoutId);
 		$workoutObj = null;

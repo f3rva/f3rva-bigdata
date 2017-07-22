@@ -46,6 +46,7 @@ $authService = new AuthenticationService();
       </ul>
       <? if ($authService->loggedIn()) { ?>
       <ul class="nav navbar-nav navbar-right">
+      <? } ?>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>

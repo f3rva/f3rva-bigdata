@@ -98,6 +98,38 @@ class ReportService {
 		return $chartData;
 	}
 	
+	public function getMemberDetailChartData($qWorkouts, $paxWorkouts) {
+		$this->defaultTimezone();
+		
+		$chartData = new ChartData();
+		$labels = array();
+		$series = array();
+		
+		// this needs to be refactored.  Not very efficient
+		foreach ($qWorkouts as $workout) {
+			foreach ($workout->getAo() as $aoId => $ao) {
+				if (is_null($series[$aoId])) {
+					$series[$aoId] = array($ao, 0, 0);
+				}
+				
+				$series[$aoId][1] = $series[$aoId][1] + 1;
+			}
+		}
+		foreach ($paxWorkouts as $workout) {
+			foreach ($workout->getAo() as $aoId => $ao) {
+				if (is_null($series[$aoId])) {
+					$series[$aoId] = array($ao, 0, 0);
+				}
+				
+				$series[$aoId][2] = $series[$aoId][2] + 1;
+			}
+		}
+		
+		$chartData->setSeries(array_values($series));
+		
+		return $chartData;
+	}
+	
 	public function getWorkoutCountsChartData($startDate, $endDate) {
 		$workoutCounts = $this->workoutRepo->findCount($startDate, $endDate);
 		

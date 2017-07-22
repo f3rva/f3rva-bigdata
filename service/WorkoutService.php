@@ -51,6 +51,18 @@ class WorkoutService {
 		return $this->processWorkoutResults($workouts);
 	}
 	
+	public function getWorkoutsByQ($qId) {
+		$workouts = $this->workoutRepo->findAllByQ($qId);
+		
+		return $this->processWorkoutResults($workouts);
+	}
+	
+	public function getWorkoutsByPax($paxId) {
+		$workouts = $this->workoutRepo->findAllByPax($paxId);
+		
+		return $this->processWorkoutResults($workouts);
+	}
+	
 	public function getWorkout($workoutId) {
 		$details = $this->workoutRepo->find($workoutId);
 		$workoutObj = null;
@@ -146,6 +158,34 @@ class WorkoutService {
 			// add the pax members
 			$this->saveWorkoutMembers($workoutId, $additionalInfo->pax);
 
+			$db->commit();
+		}
+		catch (\Exception $e) {
+			$db->rollBack();
+			error_log($e);
+			throw $e;
+		}
+		
+		return $workoutId;
+	}
+	
+	public function deleteWorkout($workoutId) {
+		$db = Database::getInstance()->getDatabase();
+		try {
+			$db->beginTransaction();
+			
+			// delete previous aos
+			$this->workoutRepo->deleteWorkoutAos($workoutId);
+			
+			// delete the previous qs
+			$this->workoutRepo->deleteWorkoutQs($workoutId);
+			
+			// delete the previous members
+			$this->workoutRepo->deleteWorkoutMembers($workoutId);
+			
+			// delete the workout
+			$this->workoutRepo->deleteWorkout($workoutId);
+			
 			$db->commit();
 		}
 		catch (\Exception $e) {

@@ -41,6 +41,14 @@ class WorkoutRepository {
 		$stmt->execute([$workoutId]);
 	}
 	
+	public function deleteWorkout($workoutId) {
+			$stmt = $this->db->prepare('
+			delete from WORKOUT
+			where WORKOUT_ID=?
+		');
+		$stmt->execute([$workoutId]);
+	}
+			
 	public function find($id) {
 		$stmt = $this->db->prepare('
 			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q from WORKOUT w
@@ -86,6 +94,42 @@ class WorkoutRepository {
 				order by w.WORKOUT_DATE desc, ao.DESCRIPTION asc
 		');
 		$stmt->execute([$aoId]);
+		
+		return $stmt->fetchAll();
+	}
+	
+	public function findAllByQ($qId) {
+		$stmt = $this->db->prepare('
+			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
+				left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
+				left outer join WORKOUT_Q wq on w.WORKOUT_ID = wq.WORKOUT_ID
+				left outer join MEMBER mq on wq.MEMBER_ID = mq.MEMBER_ID
+				left outer join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
+				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
+				left outer join AO ao on wao.AO_ID = ao.AO_ID
+				where wq.MEMBER_ID = ?
+				group by w.WORKOUT_ID, ao.AO_ID, mq.MEMBER_ID, ao.DESCRIPTION
+				order by w.WORKOUT_DATE desc, ao.DESCRIPTION asc
+		');
+		$stmt->execute([$qId]);
+		
+		return $stmt->fetchAll();
+	}
+	
+	public function findAllByPax($paxId) {
+		$stmt = $this->db->prepare('
+			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
+				left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
+				left outer join WORKOUT_Q wq on w.WORKOUT_ID = wq.WORKOUT_ID
+				left outer join MEMBER mq on wq.MEMBER_ID = mq.MEMBER_ID
+				left outer join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
+				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
+				left outer join AO ao on wao.AO_ID = ao.AO_ID
+				where wp.MEMBER_ID = ?
+				group by w.WORKOUT_ID, ao.AO_ID, mq.MEMBER_ID, ao.DESCRIPTION
+				order by w.WORKOUT_DATE desc, ao.DESCRIPTION asc
+		');
+		$stmt->execute([$paxId]);
 		
 		return $stmt->fetchAll();
 	}

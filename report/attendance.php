@@ -56,7 +56,7 @@ use F3\Service\ReportService;
 			foreach ($attendance as $summary) {
 			?>
 				<tr>
-					<td><?= $summary->getDescription() ?></td>
+					<td><a href="/member/detail.php?id=<?= $summary->getId() ?>"><?= $summary->getDescription() ?></a></td>
 					<td><?= $summary->getValue() ?></td>
 				</tr>
 			<?
@@ -74,7 +74,7 @@ use F3\Service\ReportService;
 			foreach ($qs as $summary) {
 			?>
 				<tr>
-					<td><?= $summary->getDescription() ?></td>
+					<td><a href="/member/detail.php?id=<?= $summary->getId() ?>"><?= $summary->getDescription() ?></a></td>
 					<td><?= $summary->getValue() ?></td>
 				</tr>
 			<?

@@ -39,14 +39,14 @@ class ScraperDao {
 		// query to get the Q
 		$qNode = $xpath->query("//ul/li/strong[text()='QIC:']")->item(0);
 		$qStr = trim($qNode->nextSibling->nodeValue);
-		$split = preg_split("/,|\band\b/", $qStr);
+		$split = preg_split("/,|\band\b|&/", $qStr);
 		// trim values and remove empty values from the array
 		$qArray = array_filter(array_map('trim', $split));
 		
 		// query to get the PAX
 		$paxNode = $xpath->query("//ul/li/strong[text()='The PAX:']")->item(0);
 		$paxStr = trim($paxNode->nextSibling->nodeValue);
-		$split = preg_split("/,|\band\b/", $paxStr);
+		$split = preg_split("/,|\band\b|&/", $paxStr);
 		// trim values and remove empty values from the array
 		$paxArray = array_filter(array_map('trim', $split));
 		

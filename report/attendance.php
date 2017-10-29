@@ -5,8 +5,10 @@ if (!defined('__ROOT__')) {
 	define('__ROOT__', dirname(dirname(__FILE__)));
 }
 require_once(__ROOT__ . '/service/ReportService.php');
+require_once(__ROOT__ . '/util/DateUtil.php');
 
 use F3\Service\ReportService;
+use F3\Util\DateUtil;
 ?>
 
 <!DOCTYPE html>
@@ -20,8 +22,8 @@ use F3\Service\ReportService;
 
 <?
 	$reportService = new ReportService();
-	$startDate = $reportService->getDefaultDateSubtractInterval($_REQUEST['startDate'], 'P1M');
-	$endDate= $reportService->getDefaultDate($_REQUEST['endDate']);
+	$startDate = DateUtil::getDefaultDateSubtractInterval($_REQUEST['startDate'], 'P1M');
+	$endDate= DateUtil::getDefaultDate($_REQUEST['endDate']);
 	
 	$attendance = $reportService->getPAXAttendance($startDate, $endDate);
 	$qs = $reportService->getQTotals($startDate, $endDate);

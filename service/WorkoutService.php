@@ -10,6 +10,7 @@ require_once(__ROOT__ . '/model/Workout.php');
 require_once(__ROOT__ . '/repo/Database.php');
 require_once(__ROOT__ . '/repo/WorkoutRepo.php');
 require_once(__ROOT__ . '/service/MemberService.php');
+require_once(__ROOT__ . '/util/DateUtil.php');
 
 use F3\Dao\ScraperDao;
 use F3\Model\Member;
@@ -17,6 +18,7 @@ use F3\Model\Workout;
 use F3\Repo\Database;
 use F3\Repo\WorkoutRepository;
 use F3\Service\MemberService;
+use F3\Util\DateUtil;
 
 /**
  * Service class encapsulating business logic for workouts.
@@ -39,8 +41,14 @@ class WorkoutService {
 	 * 
 	 * @return array of Member
 	 */
-	public function getWorkouts() {
-		$workouts = $this->workoutRepo->findAll();
+	public function getWorkouts($endDate, $numberOfDaysBack) {
+		if (is_null($endDate)) {
+			$endDate = $this->workoutRepo->findMaxWorkoutDate();
+		}
+		
+		$startDate = DateUtil::getDefaultDateSubtractInterval($endDate, 'P' . $numberOfDaysBack . 'D');
+		
+		$workouts = $this->workoutRepo->findAllByDateRange($startDate, $endDate);
 		
 		return $this->processWorkoutResults($workouts);
 	}

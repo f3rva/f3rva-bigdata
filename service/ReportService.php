@@ -9,12 +9,14 @@ require_once(__ROOT__ . '/model/DayOfWeek.php');
 require_once(__ROOT__ . '/model/Summary.php');
 require_once(__ROOT__ . '/repo/MemberRepo.php');
 require_once(__ROOT__ . '/repo/WorkoutRepo.php');
+require_once(__ROOT__ . '/util/DateUtil.php');
 
 use F3\Model\ChartData;
 use F3\Model\DayOfWeek;
 use F3\Model\Summary;
 use F3\Repo\MemberRepository;
 use F3\Repo\WorkoutRepository;
+use F3\Util\DateUtil;
 
 /**
  * Service class for all reporting.
@@ -74,7 +76,7 @@ class ReportService {
 	}
 	
 	public function getAoDetailChartData($aoId, $workouts) {
-		$this->defaultTimezone();
+		DateUtil::defaultTimezone();
 		
 		$chartData = new ChartData();
 		$labels = array();
@@ -99,7 +101,7 @@ class ReportService {
 	}
 	
 	public function getMemberDetailChartData($qWorkouts, $paxWorkouts) {
-		$this->defaultTimezone();
+		DateUtil::defaultTimezone();
 		
 		$chartData = new ChartData();
 		$labels = array();
@@ -213,27 +215,6 @@ class ReportService {
 		}
 		
 		return $totalsArray;
-	}
-	
-	public function getDefaultDate($date) {
-		return $this->getDefaultDateSubtractInterval($date, 'P0M');
-	}
-
-	public function getDefaultDateSubtractInterval($date, $dateInterval) {
-		$this->defaultTimezone();
-		
-		$dateDefault = $date;
-		if (empty($date)) {
-			$now = new \DateTime();
-			$now->sub(new \DateInterval($dateInterval));
-			$dateDefault = $now->format('Y-m-d');
-		}
-		
-		return $dateDefault;
-	}
-	
-	private function defaultTimezone() {
-		date_default_timezone_set('America/New_York');
 	}
 }
 

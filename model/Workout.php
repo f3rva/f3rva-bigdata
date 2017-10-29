@@ -1,7 +1,7 @@
 <?php 
 namespace F3\Model;
 
-class Workout {
+class Workout implements \JsonSerializable {
 	private $workoutId;
 	private $backblastUrl;
 	private $title;
@@ -73,6 +73,22 @@ class Workout {
 	
 	public function setWorkoutDate($workoutDate) {
 		$this->workoutDate = $workoutDate;
+	}
+	
+	public function jsonSerialize()
+	{
+		return [
+				'workout' => [
+						'workoutId' => $this->workoutId,
+						'backblastUrl' => $this->backblastUrl,
+						'title' => $this->title,
+						'ao' => $this->ao,
+						'q' => $this->q,
+						'pax' => $this->pax,
+						'paxCount' => $this->paxCount,
+						'workoutDate' => $this->workoutDate
+				]
+		];
 	}
 }
 

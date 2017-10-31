@@ -28,7 +28,7 @@ $(document).ready(function() {
 						// column 1
 						$(row).append('<td>' + v.workout.workoutDate + '</td>');
 						// column 2
-						$(row).append('<td><a href="' + v.workout.backblastUrl + ' target="_blank">' + v.workout.title + '</a></td>');
+						$(row).append('<td><a href="' + v.workout.backblastUrl + '" target="_blank">' + v.workout.title + '</a></td>');
 						// column 3
 						var aoRow = '<td><ul class="list-unstyled">';
 						$.each(v.workout.ao, function (k, v) {

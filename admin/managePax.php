@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			?>
 			    <tr>
 			        <td><?= $member->getMemberId() ?></td>
-			        <td><?= $member->getF3Name() ?></td>
+			        <td><a href="/member/detail.php?id=<?= $member->getMemberId() ?>"><?= $member->getF3Name() ?></a></td>
 			    </tr>
 			<?
 			    }

@@ -150,57 +150,6 @@ class ReportService {
 		return $chartData;
 	}
 	
-	public function getWorkoutCountsChartData($startDate, $endDate) {
-		$workoutCounts = $this->workoutRepo->findCount($startDate, $endDate);
-		
-		// loop over results to get a set of AOs
-		$aos = array();
-		foreach ($workoutCounts as $count) {
-			$aoId = $count['AO_ID'];
-			if (!empty($aoId)) {
-				$aos[$aoId] = $count['AO'];
-			}
-		}
-		// sort by name
-		asort($aos);
-				
-		// create our chart data
-		$chartData = new ChartData();
-		$chartData->setXLabels($aos);
-		
-		// build our labels as a sequence of days from start to end
-		$dates = array();
-		$start = new \DateTime($startDate);
-		$end = new \DateTime($endDate);
-		$interval = new \DateInterval('P1D');
-		while ($start <= $end) {
-			$dateStr = $start->format('n/j');
-			$dates[$dateStr] = $start;
-			$start->add($interval);
-		}
-		
-		// create a table with rows as the days and columns as the AO numbers
-		$series = array_fill_keys(array_keys($dates), null);
-		foreach ($series as $key => $value) {
-			$series[$key] = array($key => "'" . $key . "'") + array_fill_keys(array_keys($aos), 'null');
-		}
-		
-		foreach ($workoutCounts as $count) {
-			$aoId = $count['AO_ID'];
-			$paxCount = $count['PAX_COUNT'];
-			$workoutDate = date_parse($count['WORKOUT_DATE']);
-			$date = $workoutDate['month'] . '/' . $workoutDate['day'];
-			
-			if (!empty($aoId)) {
-				$series[$date][$aoId] = $paxCount;
-			}
-		}
-		
-		$chartData->setSeries($series);
-		
-		return $chartData;
-	}
-	
 	public function getPAXAttendance($startDate, $endDate) {
 		$paxTotals = $this->memberRepo->findPAXAttendance($startDate, $endDate);
 		

@@ -26,15 +26,9 @@ use F3\Util\DateUtil;
 	$endDate = DateUtil::getDefaultDate($_REQUEST['endDate']);
 	
 	$aoAverages = $reportService->getAverageAttendanceByAO($startDate, $endDate);
-	$chartData = $reportService->getWorkoutCountsChartData($startDate, $endDate);
 ?>
 
 <div class="container-fluid">
-	<div class="row">
-		<div class="col col-sm-12">
-			<div id="chartContainer"></div>
-		</div>
-	</div>
 	<div class="row">
 		<div class="col col-sm-3">
 			<form method="get" action="ao.php">
@@ -79,38 +73,6 @@ use F3\Util\DateUtil;
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
 	
-	<script>
-		google.charts.load('current', {packages: ['corechart', 'line']});
-		google.charts.setOnLoadCallback(drawChart);
-	
-		function drawChart() {
-			var data = new google.visualization.DataTable();
-			data.addColumn('string', 'Day');
-			<? foreach ($chartData->getXLabels() as $label) { ?>
-				data.addColumn('number', '<?= $label ?>');
-			<? } ?>
-			
-			data.addRows([
-				<?= $chartData->getSeriesImploded() ?>
-			]);
-	
-			var options = {
-				hAxis: {
-					title: 'Time',
-					logScale: true
-				},
-				vAxis: {
-					title: 'Popularity',
-					logScale: false
-				},
-				colors: ['#a52714', '#097138'],
-				interpolateNulls: true
-			};
-	
-			var chart = new google.visualization.LineChart(document.getElementById('chartContainer'));
-			chart.draw(data, options);
-		}
-	</script>
 </body>
 </html>
 

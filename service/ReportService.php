@@ -84,16 +84,34 @@ class ReportService {
 		
 		// lookup the AO name
 		$ao = $this->workoutRepo->findAo($aoId);
-		array_push($labels, $ao['DESCRIPTION']);
 		
 		foreach (array_reverse($workouts) as $workout) {
 			$dateArray = array();
-			$date = new \DateTime($workout->getWorkoutDate());
-			array_push($dateArray, $date->format("'n/j'"));
-			array_push($dateArray, $workout->getPaxCount());
-			array_push($series, $dateArray);
+			$rawDate = new \DateTime($workout->getWorkoutDate());
+			$year = $rawDate->format("Y");
+			$labels[$year] = $year;
+			$day = $rawDate->format("'m/d'");
+			
+			// if the day doesn't exist, create a new array to store multiple years
+			if (!array_key_exists($day, $series)) {
+				$series[$day] = array();
+			}
+
+			$series[$day][$year] = $workout->getPaxCount();
 		}
 		
+		// fill the data with nulls as necessary
+		foreach ($series as $key=>$day) {
+			foreach ($labels as $year) {
+				if (!array_key_exists($year, $day)) {
+					$series[$key][$year] = 'null';
+				}
+			}
+			// must sort so that they are represented in numerical order
+			ksort($series[$key]);
+		}
+		ksort($series);
+
 		$chartData->setXLabels($labels);
 		$chartData->setSeries($series);
 		

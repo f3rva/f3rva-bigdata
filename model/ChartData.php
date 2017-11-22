@@ -24,8 +24,13 @@ class ChartData {
 	public function getSeriesImploded() {
 		$allSeries = array();
 
-		foreach ($this->getSeries() as $ser) {
-			array_push($allSeries, '[' . implode(",", $ser) . ']');
+		foreach ($this->getSeries() as $key=>$ser) {
+			if (is_array($ser)) {
+				array_push($allSeries, '[' . $key . ',' . implode(",", $ser) . ']');
+			}
+			else {
+				array_push($allSeries, '[' . implode(",", $ser) . ']');
+			}
 		}
 		
 		return implode(",", $allSeries);

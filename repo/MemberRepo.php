@@ -142,6 +142,21 @@ class MemberRepository {
 		return $stmt->fetchAll();
 	}
 	
+	public function findMemberStats($memberId) {
+		$sql = '
+			select w.NUM_WORKOUTS, q.NUM_QS from (
+				select count(*) as NUM_WORKOUTS from WORKOUT_PAX where MEMBER_ID=?
+				) as w
+				cross join (
+				select count(*) as NUM_QS from WORKOUT_Q where MEMBER_ID=?
+				) as q
+		';
+		$stmt = $this->db->prepare($sql);
+		$stmt->execute([$memberId, $memberId]);
+		
+		return $stmt->fetch();
+	}
+	
 	/**
 	 * Inserts the user into the database and returns the id of the inserted member
 	 */

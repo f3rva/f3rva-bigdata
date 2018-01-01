@@ -5,12 +5,14 @@ if (!defined('__ROOT__')) {
 	define('__ROOT__', dirname(dirname(dirname(__FILE__))));
 }
 require_once(__ROOT__ . '/model/Member.php');
+require_once(__ROOT__ . '/model/MemberStats.php');
 require_once(__ROOT__ . '/repo/Database.php');
 require_once(__ROOT__ . '/repo/MemberRepo.php');
 
 use F3\Model\Member;
 use F3\Repo\Database;
 use F3\Repo\MemberRepository;
+use F3\Model\MemberStats;
 
 /**
  * Service class encapsulating business logic for members.
@@ -76,6 +78,17 @@ class MemberService {
 		}
 		
 		return $member;
+	}
+	
+	public function getMemberStats($memberId) {
+		$statsResult = $this->memberRepo->findMemberStats($memberId);
+		
+		$stats = new MemberStats();
+		$stats->setMemberId($memberId);
+		$stats->setNumWorkouts(intval($statsResult["NUM_WORKOUTS"]));
+		$stats->setNumQs(intval($statsResult["NUM_QS"]));
+		
+		return $stats;
 	}
 	
 	public function assignAlias($memberId, $associatedMemberId) {

@@ -26,7 +26,8 @@ use F3\Service\WorkoutService;
 	$memberId = $_REQUEST['id'];
 	$memberService = new MemberService();
 	$member = $memberService->getMemberById($memberId);
-
+	$memberStats = $memberService->getMemberStats($memberId);
+	
 	$workoutService = new WorkoutService();
 	$qWorkouts = $workoutService->getWorkoutsByQ($memberId);
 	$paxWorkouts = $workoutService->getWorkoutsByPax($memberId);
@@ -134,7 +135,7 @@ use F3\Service\WorkoutService;
 		var options = {
 			chart: {
 			title: 'Attendance',
-			subtitle: 'Qs and Attendance by AO',
+			subtitle: 'Q to Workout Ratio - <?= $memberStats->getWorkoutToQRatio() * 100 ?>%',
 			}
 		};
 	

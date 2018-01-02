@@ -98,7 +98,8 @@ class MemberRepository {
 		
 		$sql = $sql . '
 			    group by m.F3_NAME
-			    order by count(wp.WORKOUT_ID) desc;
+			    order by count(wp.WORKOUT_ID) desc,
+						 m.F3_NAME asc
 		';
 		$stmt = $this->db->prepare($sql);
 		
@@ -128,7 +129,8 @@ class MemberRepository {
 		
 		$sql = $sql . '
 			    group by m.F3_NAME
-			    order by count(wq.WORKOUT_ID) desc;
+			    order by count(wq.WORKOUT_ID) desc,
+						 m.F3_NAME asc
 		';
 		$stmt = $this->db->prepare($sql);
 		

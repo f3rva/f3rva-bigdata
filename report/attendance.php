@@ -23,7 +23,7 @@ use F3\Util\DateUtil;
 <?
 	$reportService = new ReportService();
 	$startDate = DateUtil::getDefaultDateSubtractInterval($_REQUEST['startDate'], 'P1M');
-	$endDate= DateUtil::getDefaultDate($_REQUEST['endDate']);
+	$endDate = DateUtil::getDefaultDate($_REQUEST['endDate']);
 	
 	$attendance = $reportService->getPAXAttendance($startDate, $endDate);
 	$qs = $reportService->getQTotals($startDate, $endDate);

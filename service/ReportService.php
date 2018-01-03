@@ -170,42 +170,6 @@ class ReportService {
 		
 		return $totalsArray;
 	}
-	
-	public function getPAXAttendance($startDate, $endDate) {
-		$paxTotals = $this->memberRepo->findPAXAttendance($startDate, $endDate);
-		
-		$totalsArray = array();
-		
-		foreach ($paxTotals as $total) {
-			$summary = new Summary();
-			$summary->setValue($total['COUNT']);
-			$summary->setId($total['MEMBER_ID']);
-			$summary->setDescription($total['F3_NAME']);
-			
-			//array_push($totalsArray, $summary);
-			$totalsArray[$summary->getId()] = $summary;
-		}
-		
-		return $totalsArray;
-	}
-	
-	public function getQTotals($startDate, $endDate) {
-		$paxTotals = $this->memberRepo->findQTotals($startDate, $endDate);
-		
-		$totalsArray = array();
-		
-		foreach ($paxTotals as $total) {
-			$summary = new Summary();
-			$summary->setValue($total['COUNT']);
-			$summary->setId($total['MEMBER_ID']);
-			$summary->setDescription($total['F3_NAME']);
-			
-			//array_push($totalsArray, $summary);
-			$totalsArray[$summary->getId()] = $summary;
-		}
-		
-		return $totalsArray;
-	}
 }
 
 ?>

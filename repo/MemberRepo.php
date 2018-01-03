@@ -153,68 +153,6 @@ class MemberRepository {
 		return $stmt->fetchAll();
 	}
 	
-	public function findPAXAttendance($startDate, $endDate) {
-		$sql = '
-			select m.MEMBER_ID, m.F3_NAME, count(wp.WORKOUT_ID) as COUNT from WORKOUT_PAX wp
-				join MEMBER m on wp.MEMBER_ID = m.MEMBER_ID
-			    join WORKOUT w on wp.WORKOUT_ID = w.WORKOUT_ID
-		';
-		
-		$hasDates = !empty($startDate) && !empty($endDate);
-		if ($hasDates) {
-			$sql = $sql . '
-				where w.WORKOUT_DATE between ? and ?
-			';
-		}
-		
-		$sql = $sql . '
-			    group by m.F3_NAME
-			    order by count(wp.WORKOUT_ID) desc,
-						 m.F3_NAME asc
-		';
-		$stmt = $this->db->prepare($sql);
-		
-		if ($hasDates) {
-			$stmt->execute([$startDate, $endDate]);
-		}
-		else {
-			$stmt->execute();
-		}
-		
-		return $stmt->fetchAll();
-	}
-	
-	public function findQTotals($startDate, $endDate) {
-		$sql = '
-			select m.MEMBER_ID, m.F3_NAME, count(wq.WORKOUT_ID) as COUNT from WORKOUT_Q wq
-				join MEMBER m on wq.MEMBER_ID = m.MEMBER_ID
-			    join WORKOUT w on wq.WORKOUT_ID = w.WORKOUT_ID
-		';
-		
-		$hasDates = !empty($startDate) && !empty($endDate);
-		if ($hasDates) {
-			$sql = $sql . '
-				where w.WORKOUT_DATE between ? and ?
-			';
-		}
-		
-		$sql = $sql . '
-			    group by m.F3_NAME
-			    order by count(wq.WORKOUT_ID) desc,
-						 m.F3_NAME asc
-		';
-		$stmt = $this->db->prepare($sql);
-		
-		if ($hasDates) {
-			$stmt->execute([$startDate, $endDate]);
-		}
-		else {
-			$stmt->execute();
-		}
-		
-		return $stmt->fetchAll();
-	}
-	
 	public function findMemberStats($memberId) {
 		$sql = '
 			select w.NUM_WORKOUTS, q.NUM_QS, q.NUM_QS / w.NUM_WORKOUTS as Q_RATIO from (

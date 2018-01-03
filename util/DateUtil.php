@@ -19,15 +19,22 @@ class DateUtil {
 	public static function getDefaultDateSubtractInterval($date, $dateInterval) {
 		self::defaultTimezone();
 		
-		$newDate = null;
-		if (empty($date)) {
+		$dateStr = $date;
+		
+		if (empty($dateStr)) {
 			$newDate = new \DateTime();
 			$newDate->sub(new \DateInterval($dateInterval));
+			$dateStr = $newDate->format('Y-m-d');
 		}
-		else {
-			$newDate = \DateTime::createFromFormat('Y-m-d', $date);
-		}
-
+		
+		return $dateStr;
+	}
+	
+	public static function subtractInterval($date, $dateInterval) {
+		self::defaultTimezone();
+		
+		$newDate = \DateTime::createFromFormat('Y-m-d', $date);
+		$newDate->sub(new \DateInterval($dateInterval));
 		$dateStr = $newDate->format('Y-m-d');
 		
 		return $dateStr;

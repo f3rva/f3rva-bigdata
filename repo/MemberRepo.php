@@ -82,6 +82,77 @@ class MemberRepository {
 		return $stmt->fetchAll();
 	}
 	
+	public function findAttendanceCounts($startDate, $endDate, $order) {
+		$sql = '
+			select MEMBER_ID, F3_NAME, sum(WORKOUT_COUNT) as WORKOUT_COUNT, sum(Q_COUNT) as Q_COUNT, sum(Q_COUNT) / sum(WORKOUT_COUNT) as Q_RATIO
+			from (
+					select m.MEMBER_ID, m.F3_NAME, count(wp.WORKOUT_ID) as WORKOUT_COUNT, 0 as Q_COUNT from WORKOUT_PAX wp
+					join MEMBER m on wp.MEMBER_ID = m.MEMBER_ID
+					join WORKOUT w on wp.WORKOUT_ID = w.WORKOUT_ID
+		';
+		
+		$hasDates = !empty($startDate) && !empty($endDate);
+		if ($hasDates) {
+			$sql = $sql . '
+					where w.WORKOUT_DATE between ? and ?
+			';
+		}
+		
+		$sql = $sql . '
+					group by m.F3_NAME
+					
+					union
+					
+					select m.MEMBER_ID, m.F3_NAME, 0, count(wq.WORKOUT_ID) from WORKOUT_Q wq
+					join MEMBER m on wq.MEMBER_ID = m.MEMBER_ID
+					join WORKOUT w on wq.WORKOUT_ID = w.WORKOUT_ID
+		';
+					
+		$hasDates = !empty($startDate) && !empty($endDate);
+		if ($hasDates) {
+			$sql = $sql . '
+					where w.WORKOUT_DATE between ? and ?
+			';
+		}
+		
+		$sql = $sql . '
+					group by m.F3_NAME
+			) COUNTS
+			group by MEMBER_ID, F3_NAME
+		';
+		
+			
+			
+		switch ($order) {
+			case 'workout':
+				$sql = $sql . 'order by WORKOUT_COUNT desc';
+				break;
+			case 'q':
+				$sql = $sql . 'order by Q_COUNT desc';
+				break;
+			case 'ratio':
+				$sql = $sql . 'order by Q_RATIO desc';
+				break;
+			default:
+				$sql = $sql . 'order by WORKOUT_COUNT desc';
+				break;
+		}
+		$sql = $sql . ', 
+			F3_NAME desc
+		';
+		
+		$stmt = $this->db->prepare($sql);
+		
+		if ($hasDates) {
+			$stmt->execute([$startDate, $endDate, $startDate, $endDate]);
+		}
+		else {
+			$stmt->execute();
+		}
+		
+		return $stmt->fetchAll();
+	}
+	
 	public function findPAXAttendance($startDate, $endDate) {
 		$sql = '
 			select m.MEMBER_ID, m.F3_NAME, count(wp.WORKOUT_ID) as COUNT from WORKOUT_PAX wp
@@ -98,7 +169,8 @@ class MemberRepository {
 		
 		$sql = $sql . '
 			    group by m.F3_NAME
-			    order by count(wp.WORKOUT_ID) desc;
+			    order by count(wp.WORKOUT_ID) desc,
+						 m.F3_NAME asc
 		';
 		$stmt = $this->db->prepare($sql);
 		
@@ -128,7 +200,8 @@ class MemberRepository {
 		
 		$sql = $sql . '
 			    group by m.F3_NAME
-			    order by count(wq.WORKOUT_ID) desc;
+			    order by count(wq.WORKOUT_ID) desc,
+						 m.F3_NAME asc
 		';
 		$stmt = $this->db->prepare($sql);
 		
@@ -144,7 +217,7 @@ class MemberRepository {
 	
 	public function findMemberStats($memberId) {
 		$sql = '
-			select w.NUM_WORKOUTS, q.NUM_QS from (
+			select w.NUM_WORKOUTS, q.NUM_QS, q.NUM_QS / w.NUM_WORKOUTS as Q_RATIO from (
 				select count(*) as NUM_WORKOUTS from WORKOUT_PAX where MEMBER_ID=?
 				) as w
 				cross join (

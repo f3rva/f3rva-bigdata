@@ -23,10 +23,12 @@ use F3\Util\DateUtil;
 <?
 	$reportService = new ReportService();
 	$startDate = DateUtil::getDefaultDateSubtractInterval($_REQUEST['startDate'], 'P1M');
-	$endDate= DateUtil::getDefaultDate($_REQUEST['endDate']);
+	$endDate = DateUtil::getDefaultDate($_REQUEST['endDate']);
+	$order = $_REQUEST['order'];
 	
-	$attendance = $reportService->getPAXAttendance($startDate, $endDate);
-	$qs = $reportService->getQTotals($startDate, $endDate);
+	$attendance = $reportService->getAttendanceCounts($startDate, $endDate, $order);
+	//$attendance = $reportService->getPAXAttendance($startDate, $endDate);
+	//$qs = $reportService->getQTotals($startDate, $endDate);
 ?>
 
 <div class="container-fluid">
@@ -48,40 +50,30 @@ use F3\Util\DateUtil;
 				<button type="submit" class="btn btn-default">Filter</button>
 			</form>
 		</div>
-		<div class="col col-sm-4">
-			<table class="table table-striped">
-				<tr>
-					<th>Name</th>
-					<th># Workouts</th>
-				</tr>
-			<?	
-			foreach ($attendance as $summary) {
-			?>
-				<tr>
-					<td><a href="/member/detail.php?id=<?= $summary->getId() ?>"><?= $summary->getDescription() ?></a></td>
-					<td><?= $summary->getValue() ?></td>
-				</tr>
-			<?
-				}
-			?>
-			</table>
-		</div>
-		<div class="col col-sm-4">
-			<table class="table table-striped">
-				<tr>
-					<th>Name</th>
-					<th># Qs</th>
-				</tr>
-			<?	
-			foreach ($qs as $summary) {
-			?>
-				<tr>
-					<td><a href="/member/detail.php?id=<?= $summary->getId() ?>"><?= $summary->getDescription() ?></a></td>
-					<td><?= $summary->getValue() ?></td>
-				</tr>
-			<?
-				}
-			?>
+		<div class="col col-sm-8">
+			<table id="attendance" class="table table-striped table-hover">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Workouts</th>
+						<th># Qs</th>
+						<th>Q Ratio</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?	
+				foreach ($attendance as $stat) {
+				?>
+					<tr>
+						<td><a href="/member/detail.php?id=<?= $stat->getMemberId()?>"><?= $stat->getMemberName() ?></a></td>
+						<td><?= $stat->getNumWorkouts() ?></td>
+						<td><?= $stat->getNumQs() ?></td>
+						<td><?= $stat->getQRatio() * 100 ?>%</td>
+					</tr>
+				<?
+					}
+				?>
+				</tbody>
 			</table>
 		</div>
 	</div>
@@ -91,6 +83,9 @@ use F3\Util\DateUtil;
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
+	<script src="/js/f3.report.attendance.js"></script>
+	<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
 </body>
 </html>
 

@@ -85,8 +85,9 @@ class MemberService {
 		
 		$stats = new MemberStats();
 		$stats->setMemberId($memberId);
-		$stats->setNumWorkouts(intval($statsResult["NUM_WORKOUTS"]));
-		$stats->setNumQs(intval($statsResult["NUM_QS"]));
+		$stats->setNumWorkouts($statsResult["NUM_WORKOUTS"]);
+		$stats->setNumQs($statsResult["NUM_QS"]);
+		$stats->setQRatio($statsResult["Q_RATIO"]);
 		
 		return $stats;
 	}

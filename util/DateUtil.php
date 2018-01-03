@@ -22,13 +22,13 @@ class DateUtil {
 		$newDate = null;
 		if (empty($date)) {
 			$newDate = new \DateTime();
+			$newDate->sub(new \DateInterval($dateInterval));
 		}
 		else {
 			$newDate = \DateTime::createFromFormat('Y-m-d', $date);
 		}
 
-		$newDate->sub(new \DateInterval($dateInterval));
-		$dateStr= $newDate->format('Y-m-d');
+		$dateStr = $newDate->format('Y-m-d');
 		
 		return $dateStr;
 	}

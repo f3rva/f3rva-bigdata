@@ -7,5 +7,6 @@
 
 	<link href="/css/bootstrap.min.css" rel="stylesheet">
 	<link href="/css/f3.css" rel="stylesheet">
+	<link href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css" rel="stylesheet">
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>

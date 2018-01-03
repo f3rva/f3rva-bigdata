@@ -6,6 +6,7 @@ if (!defined('__ROOT__')) {
 }
 require_once(__ROOT__ . '/model/ChartData.php');
 require_once(__ROOT__ . '/model/DayOfWeek.php');
+require_once(__ROOT__ . '/model/MemberStats.php');
 require_once(__ROOT__ . '/model/Summary.php');
 require_once(__ROOT__ . '/repo/MemberRepo.php');
 require_once(__ROOT__ . '/repo/WorkoutRepo.php');
@@ -13,6 +14,7 @@ require_once(__ROOT__ . '/util/DateUtil.php');
 
 use F3\Model\ChartData;
 use F3\Model\DayOfWeek;
+use F3\Model\MemberStats;
 use F3\Model\Summary;
 use F3\Repo\MemberRepository;
 use F3\Repo\WorkoutRepository;
@@ -150,6 +152,25 @@ class ReportService {
 		return $chartData;
 	}
 	
+	public function getAttendanceCounts($startDate, $endDate, $order) {
+		$paxTotals = $this->memberRepo->findAttendanceCounts($startDate, $endDate, $order);
+		
+		$totalsArray = array();
+		
+		foreach ($paxTotals as $total) {
+			$stats = new MemberStats();
+			$stats->setMemberId($total['MEMBER_ID']);
+			$stats->setMemberName($total['F3_NAME']);
+			$stats->setNumWorkouts($total['WORKOUT_COUNT']);
+			$stats->setNumQs($total['Q_COUNT']);
+			$stats->setQRatio($total['Q_RATIO']);
+			
+			$totalsArray[$stats->getMemberId()] = $stats;
+		}
+		
+		return $totalsArray;
+	}
+	
 	public function getPAXAttendance($startDate, $endDate) {
 		$paxTotals = $this->memberRepo->findPAXAttendance($startDate, $endDate);
 		
@@ -161,7 +182,8 @@ class ReportService {
 			$summary->setId($total['MEMBER_ID']);
 			$summary->setDescription($total['F3_NAME']);
 			
-			array_push($totalsArray, $summary);
+			//array_push($totalsArray, $summary);
+			$totalsArray[$summary->getId()] = $summary;
 		}
 		
 		return $totalsArray;
@@ -178,7 +200,8 @@ class ReportService {
 			$summary->setId($total['MEMBER_ID']);
 			$summary->setDescription($total['F3_NAME']);
 			
-			array_push($totalsArray, $summary);
+			//array_push($totalsArray, $summary);
+			$totalsArray[$summary->getId()] = $summary;
 		}
 		
 		return $totalsArray;

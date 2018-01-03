@@ -135,7 +135,7 @@ use F3\Service\WorkoutService;
 		var options = {
 			chart: {
 			title: 'Attendance',
-			subtitle: 'Q to Workout Ratio - <?= $memberStats->getWorkoutToQRatio() * 100 ?>%',
+			subtitle: 'Q to Workout Ratio - <?= $memberStats->getQRatio() * 100 ?>%',
 			}
 		};
 	

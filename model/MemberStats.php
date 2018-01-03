@@ -3,8 +3,10 @@ namespace F3\Model;
 
 class MemberStats {
 	private $memberId;
+	private $memberName;
 	private $numWorkouts;
 	private $numQs;
+	private $qRatio;
 	
 	public function getMemberId() {
 		return $this->memberId;
@@ -12,6 +14,14 @@ class MemberStats {
 	
 	public function setMemberId($memberId) {
 		$this->memberId = $memberId;
+	}
+	
+	public function getMemberName() {
+		return $this->memberName;
+	}
+	
+	public function setMemberName($memberName) {
+		$this->memberName = $memberName;
 	}
 	
 	public function getNumWorkouts() {
@@ -30,8 +40,12 @@ class MemberStats {
 		$this->numQs = $numQs;
 	}
 	
-	public function getWorkoutToQRatio() {
-		return $this->numQs / $this->numWorkouts;
+	public function getQRatio() {
+		return $this->qRatio;
+	}
+	
+	public function setQRatio($qRatio) {
+		$this->qRatio = $qRatio;
 	}
 }
 

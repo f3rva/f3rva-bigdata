@@ -43,7 +43,7 @@ class WorkoutService {
 	 */
 	public function getWorkouts($endDate, $numberOfDaysBack) {
 		if (is_null($endDate)) {
-			$endDate = $this->workoutRepo->findMaxWorkoutDate();
+			$endDate = $this->workoutRepo->findMostRecentWorkoutDate();
 		}
 		
 		$startDate = DateUtil::subtractInterval($endDate, 'P' . $numberOfDaysBack . 'D');

@@ -42,6 +42,7 @@ class WorkoutService {
 	 * @return array of Member
 	 */
 	public function getWorkouts($endDate, $numberOfDaysBack) {
+		error_log('endDate: ' . $endDate);
 		if (is_null($endDate)) {
 			$endDate = $this->workoutRepo->findMostRecentWorkoutDate();
 		}
@@ -105,6 +106,11 @@ class WorkoutService {
 		// parse the post to get the information we need
 		$additionalInfo = $this->scraperDao->parsePost($data->post->url);
 		error_log('additionalInfo: ' . json_encode($additionalInfo));
+		
+		// check to see if this workout is in the future.  if it is then skip 
+		$now = getdate();
+
+		error_log('date diff: ' . date_diff($additionalInfo->date, $now));
 		
 		$db = Database::getInstance()->getDatabase();
 		try {
@@ -175,6 +181,24 @@ class WorkoutService {
 		}
 		
 		return $workoutId;
+	}
+	
+	public function refreshWorkouts($numDays) {
+		error_log('refreshing the past ' . $numDays . ' days');
+		// get all workouts in the most recent days
+		$workouts = $this->getWorkouts(DateUtil::getDefaultDate(null), $numDays);
+		
+		$refreshed = array();
+		
+		// loop through all workouts that meet criteria
+		foreach ($workouts as $workout) {
+			// refresh the workout
+			$this->refreshWorkout($workout->getWorkoutId());
+			
+			$refreshed[$workout->getWorkoutId()] = $workout->getTitle();
+		}
+		
+		return $refreshed;
 	}
 	
 	public function deleteWorkout($workoutId) {

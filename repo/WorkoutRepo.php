@@ -274,9 +274,11 @@ class WorkoutRepository {
 		return $stmt->fetchAll();
 	}
 	
-	public function findMaxWorkoutDate() {
+	public function findMostRecentWorkoutDate() {
 		$stmt = $this->db->prepare('
-			select max(WORKOUT_DATE) as MAX_DATE from WORKOUT w
+			select max(WORKOUT_DATE) as MAX_DATE 
+			from WORKOUT w
+			where w.WORKOUT_DATE <= NOW()
 		');
 		$stmt->execute();
 		

@@ -42,8 +42,9 @@ class WorkoutService {
 	 * @return array of Member
 	 */
 	public function getWorkouts($endDate, $numberOfDaysBack) {
+		error_log('endDate: ' . $endDate);
 		if (is_null($endDate)) {
-			$endDate = $this->workoutRepo->findMaxWorkoutDate();
+			$endDate = $this->workoutRepo->findMostRecentWorkoutDate();
 		}
 		
 		$startDate = DateUtil::subtractInterval($endDate, 'P' . $numberOfDaysBack . 'D');
@@ -106,28 +107,34 @@ class WorkoutService {
 		$additionalInfo = $this->scraperDao->parsePost($data->post->url);
 		error_log('additionalInfo: ' . json_encode($additionalInfo));
 		
-		$db = Database::getInstance()->getDatabase();
-		try {
-			$db->beginTransaction();
-			
-			// insert the workout
-			$workoutId = $this->workoutRepo->save($data->post->title, $additionalInfo->date, $data->post->url);
-			
-			// add the aos
-			$this->saveWorkoutAos($workoutId, $additionalInfo->tags);
-			
-			// add the qs
-			$this->saveWorkoutQs($workoutId, $additionalInfo->q);
-			
-			// add the pax members
-			$this->saveWorkoutMembers($workoutId, $additionalInfo->pax);
-			
-			$db->commit();
-		}
-		catch (\Exception $e) {
-			$db->rollBack();
-			error_log($e);
-			throw $e;
+		$workoutId = null;
+		
+		// validate the workout
+		if ($this->validateWorkout($additionalInfo)) {
+			$db = Database::getInstance()->getDatabase();
+			try {
+				$db->beginTransaction();
+				
+				// insert the workout
+				//error_log('adding workout: ' . $data->post->title . ' | ' . $additionalInfo->dateTime . '|' . $data->post->url);
+				$workoutId = $this->workoutRepo->save($data->post->title, $additionalInfo->date, $data->post->url);
+				
+				// add the aos
+				$this->saveWorkoutAos($workoutId, $additionalInfo->tags);
+				
+				// add the qs
+				$this->saveWorkoutQs($workoutId, $additionalInfo->q);
+				
+				// add the pax members
+				$this->saveWorkoutMembers($workoutId, $additionalInfo->pax);
+				
+				$db->commit();
+			}
+			catch (\Exception $e) {
+				$db->rollBack();
+				error_log($e);
+				throw $e;
+			}
 		}
 		
 		return $workoutId;
@@ -141,40 +148,61 @@ class WorkoutService {
 		$additionalInfo = $this->scraperDao->parsePost($workout->getBackblastUrl());
 		error_log('additionalInfo: ' . json_encode($additionalInfo));
 		
-		$db = Database::getInstance()->getDatabase();
-		try {
-			$db->beginTransaction();
-			
-			// update the workout
-			$this->workoutRepo->update($workoutId, $workout->getTitle(), $additionalInfo->date, $workout->getBackblastUrl());
-			
-			// delete previous aos
-			$this->workoutRepo->deleteWorkoutAos($workoutId);
-			
-			// add the aos
-			$this->saveWorkoutAos($workoutId, $additionalInfo->tags);
-			
-			// delete the previous qs
-			$this->workoutRepo->deleteWorkoutQs($workoutId);
-			
-			// add the qs
-			$this->saveWorkoutQs($workoutId, $additionalInfo->q);
-			
-			// delete the previous members
-			$this->workoutRepo->deleteWorkoutMembers($workoutId);
-			
-			// add the pax members
-			$this->saveWorkoutMembers($workoutId, $additionalInfo->pax);
-
-			$db->commit();
-		}
-		catch (\Exception $e) {
-			$db->rollBack();
-			error_log($e);
-			throw $e;
+		// validate the workout
+		if ($this->validateWorkout($additionalInfo)) {
+			$db = Database::getInstance()->getDatabase();
+			try {
+				$db->beginTransaction();
+				
+				// update the workout
+				$this->workoutRepo->update($workoutId, $workout->getTitle(), $additionalInfo->date, $workout->getBackblastUrl());
+				
+				// delete previous aos
+				$this->workoutRepo->deleteWorkoutAos($workoutId);
+				
+				// add the aos
+				$this->saveWorkoutAos($workoutId, $additionalInfo->tags);
+				
+				// delete the previous qs
+				$this->workoutRepo->deleteWorkoutQs($workoutId);
+				
+				// add the qs
+				$this->saveWorkoutQs($workoutId, $additionalInfo->q);
+				
+				// delete the previous members
+				$this->workoutRepo->deleteWorkoutMembers($workoutId);
+				
+				// add the pax members
+				$this->saveWorkoutMembers($workoutId, $additionalInfo->pax);
+	
+				$db->commit();
+			}
+			catch (\Exception $e) {
+				$db->rollBack();
+				error_log($e);
+				throw $e;
+			}
 		}
 		
 		return $workoutId;
+	}
+	
+	public function refreshWorkouts($numDays) {
+		error_log('refreshing the past ' . $numDays . ' days');
+		// get all workouts in the most recent days
+		$workouts = $this->getWorkouts(DateUtil::getDefaultDate(null), $numDays);
+		
+		$refreshed = array();
+		
+		// loop through all workouts that meet criteria
+		foreach ($workouts as $workout) {
+			// refresh the workout
+			$this->refreshWorkout($workout->getWorkoutId());
+			
+			$refreshed[$workout->getWorkoutId()] = $workout->getTitle();
+		}
+		
+		return $refreshed;
 	}
 	
 	public function deleteWorkout($workoutId) {
@@ -295,6 +323,18 @@ class WorkoutService {
 			$member = $this->memberService->getOrAddMember($q);
 			$this->workoutRepo->saveWorkoutQ($workoutId, $member->getMemberId());
 		}
+	}
+	
+	private function validateWorkout($additionalInfo) {
+		// check to see if this workout is in the future.  if it is then skip
+		$dateArray = $additionalInfo->date;
+		$dateStr = $dateArray['year'] . '-' . $dateArray['month'] . '-' . $dateArray['day'];
+		if(strtotime(date('m/d/y', time())) < strtotime($dateStr)) {
+			error_log('date is in the future');
+			return false;
+		}
+		
+		return true;
 	}
 }
 

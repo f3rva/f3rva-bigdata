@@ -4,7 +4,7 @@ name: Deploy on commit to master
 
 on:
   push:
-    branches: main
+    branches: [ master ]
 
 jobs:
   sftp-deploy:

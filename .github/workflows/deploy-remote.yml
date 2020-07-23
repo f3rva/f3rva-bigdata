@@ -3,7 +3,7 @@
 name: Deploy on commit to master
 
 on:
-  push:
+  repository_dispatch push:
     branches: [ master ]
 
 jobs:

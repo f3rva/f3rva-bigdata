@@ -18,17 +18,17 @@ jobs:
         tar -cvf bigdata-deploy.tar --exclude ".git*" *
         echo "hello" >> deployfile.txt
 
-	- name: Copy deployment to remote host
-	  uses: appleboy/scp-action@master
-	  with: 
-	    host: ${{ secrets.REMOTE_HOST }}
-	    username: ${{ secrets.REMOTE_USER }}
-	    port: 22
-	    key: ${{ secrets.SERVER_SSH_KEY }}
-#	    passphrase: 
-	    source: bigdata-deploy.tar
-	    target: ${{ secrets.REMOTE_TARGET }}
-	    
+    - name: Copy deployment to remote host
+      uses: appleboy/scp-action@master
+      with: 
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        port: 22
+        key: ${{ secrets.SERVER_SSH_KEY }}
+#        passphrase: 
+        source: bigdata-deploy.tar
+        target: ${{ secrets.REMOTE_TARGET }}
+      
 #    - name: ssh deploy
 #      uses: easingthemes/ssh-deploy@v2.1.4
 #      with:

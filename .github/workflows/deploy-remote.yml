@@ -16,6 +16,7 @@ jobs:
     - name: Create deployment tarball
       run: |
          echo "hello" > test.txt
+         echo "openssh test" >> test.txt
 #        tar -cvf bigdata-deploy.tar --exclude ".git*" *
 #        echo "host: ${{ secrets.REMOTE_HOST }}" >> tmp.log
 #        echo "username: ${{ secrets.REMOTE_USER }}" >> tmp.log

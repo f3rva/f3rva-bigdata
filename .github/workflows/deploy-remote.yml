@@ -5,6 +5,8 @@ name: Deploy on commit to master
 on:
   push:
     branches: [ master ]
+  workflow_dispatch:
+    branches: [ master ]
 
 jobs:
   deploy:
@@ -28,7 +30,7 @@ jobs:
       uses: fifsky/ssh-action@master
       with:
         command: |
-          ls -a ${{ secrets.REMOTE_TARGET }}
+          ls -a 
         host: ${{ secrets.REMOTE_HOST }}
         user: ${{ secrets.REMOTE_USER }}
         key: ${{ secrets.SERVER_SSH_KEY}}

@@ -27,14 +27,14 @@ jobs:
 #        echo "target: ${{ secrets.REMOTE_TARGET }}" >> tmp.log
 #        cat tmp.log
 
-    - name: ls -a via ssh
-      uses: fifsky/ssh-action@master
-      with:
-        command: |
-          ls -a 
-        host: ${{ secrets.REMOTE_HOST }}
-        user: ${{ secrets.REMOTE_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY}}
+#    - name: ls -a via ssh
+#      uses: fifsky/ssh-action@master
+#      with:
+#        command: |
+#          ls -a 
+#        host: ${{ secrets.REMOTE_HOST }}
+#        user: ${{ secrets.REMOTE_USER }}
+#        key: ${{ secrets.SERVER_SSH_KEY}}
 
 #    - name: Copy single file to remote
 #      uses: garygrossgarten/github-action-scp@release

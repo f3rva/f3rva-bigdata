@@ -19,6 +19,7 @@ jobs:
       run: |
          echo "hello" > test.txt
          echo "openssh test" >> test.txt
+         ping -c 5 ${{ secrets.REMOTE_HOST }}
 #        tar -cvf bigdata-deploy.tar --exclude ".git*" *
 #        echo "host: ${{ secrets.REMOTE_HOST }}" >> tmp.log
 #        echo "username: ${{ secrets.REMOTE_USER }}" >> tmp.log
@@ -31,7 +32,7 @@ jobs:
       with:
         command: |
           ls -a 
-        host: 107.180.58.52
+        host: ${{ secrets.REMOTE_HOST }}
         user: ${{ secrets.REMOTE_USER }}
         key: ${{ secrets.SERVER_SSH_KEY}}
 

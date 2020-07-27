@@ -31,7 +31,7 @@ jobs:
       with:
         command: |
           ls -a 
-        host: ${{ secrets.REMOTE_HOST }}
+        host: 107.180.58.52
         user: ${{ secrets.REMOTE_USER }}
         key: ${{ secrets.SERVER_SSH_KEY}}
 

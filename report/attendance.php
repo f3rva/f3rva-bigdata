@@ -6,9 +6,11 @@ if (!defined('__ROOT__')) {
 }
 require_once(__ROOT__ . '/service/ReportService.php');
 require_once(__ROOT__ . '/util/DateUtil.php');
+require_once(__ROOT__ . '/util/Util.php');
 
 use F3\Service\ReportService;
 use F3\Util\DateUtil;
+use F3\Util\Util;
 ?>
 
 <!DOCTYPE html>
@@ -83,7 +85,7 @@ use F3\Util\DateUtil;
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
-	<script src="/js/f3.report.attendance.js"></script>
+	<script src="/js/f3.report.attendance.js?v=<?= Util::getVersion() ?>"></script>
 	<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 	<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
 </body>

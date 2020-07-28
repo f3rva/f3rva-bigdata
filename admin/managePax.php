@@ -5,8 +5,10 @@ if (!defined('__ROOT__')) {
 	define('__ROOT__', dirname(dirname(__FILE__)));
 }
 require_once(__ROOT__ . '/service/MemberService.php');
+require_once(__ROOT__ . '/util/Util.php');
 
 use F3\Service\MemberService;
+use F3\Util\Util;
 
 $memberService = new MemberService();
 
@@ -49,12 +51,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="container-fluid">
 	<div class="row">
-		<div class="col-md-3">
-			<table class="table table-striped">
-			    <tr>
-			        <th>ID</th>
-			        <th>Name</th>
-			    </tr>
+		<div class="col-md-4">
+			<table id="members" class="table table-striped table-hover">
+				<thead>
+    			    <tr>
+    			        <th>ID</th>
+    			        <th>Name</th>
+    			    </tr>
+    			</thead>
+    			<tbody>
 			<?    
 			    foreach ($members as $member) {
 			?>
@@ -65,47 +70,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			<?
 			    }
 			?>
+				</tbody>
 			</table>
 		</div>
 		<div class="col-md-3">
 			<form method="post" action="managePax.php">
 				<input type="hidden" name="action" value="merge" />
 				<div class="form-group">
-					<label for="memberId">ID</label>
-					<input type="text" name="memberId" class="form-control" id="memberId" placeholder="ID">
-					<p class="help-block">ID of the primary member id</p>
+					<input type="text" name="memberId" class="form-control" id="memberId" placeholder="Primary ID">
+					<p class="help-block">ID of the primary user</p>
 				</div>
 				<div class="form-group">
-					<label for="associatedMemberId">Associated ID</label>
-					<input type="text" name="associatedMemberId" class="form-control" id="associatedMemberId" placeholder="Associated ID">
-					<p class="help-block">ID of member you want to assocate with the primary user above</p>
+					<input type="text" name="associatedMemberId" class="form-control" id="associatedMemberId" placeholder="Alias ID">
+					<p class="help-block">ID of the record that should become an alias for the primary user above</p>
 				</div>
 				<button type="submit" class="btn btn-default">Create Alias</button>
 			</form>
-		</div>
-		<!-- 
-		<div class="col-md-3">
-			<form method="post" action="managePax.php">
-				<input type="hidden" name="action" value="split" />
-				<div class="form-group">
-					<label for="memberId">ID</label>
-					<input type="text" name="memberId" class="form-control" id="memberId" placeholder="ID">
-					<p class="help-block">ID of the member to split</p>
-				</div>
-				<div class="form-group">
-					<label for="childIds">ID</label>
-					<input type="text" name="childIds" class="form-control" id="childIds" placeholder="1,2,3">
-					<p class="help-block">Comma separated list of IDs to split into</p>
-				</div>
-				<button type="submit" class="btn btn-default">Split</button>
-			</form>
-		</div>
-		-->
+		</div>		
 	</div>
 </div>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="/js/bootstrap.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script src="/js/bootstrap.min.js"></script>
+	<script src="/js/f3.admin.managePax.js?v=<?= Util::getVersion() ?>"></script>
+	<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
 </body>
 </html>
 

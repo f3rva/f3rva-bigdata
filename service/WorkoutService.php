@@ -259,7 +259,9 @@ class WorkoutService {
 	}
 	private function createWorkoutObj($workout) {
 		$workoutObj = new Workout();
-		
+		                
+		error_log('createWorkoutObj workout: ' . json_encode($workout));
+
 		$aoArray = array();
 		// only add the AO if it exists
 		if (!is_null($workout['AO_ID'])) {

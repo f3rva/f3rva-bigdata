@@ -24,9 +24,9 @@ use F3\Util\Util;
 
 <?
 	$reportService = new ReportService();
-	$startDate = DateUtil::getDefaultDateSubtractInterval($_REQUEST['startDate'], 'P1M');
-	$endDate = DateUtil::getDefaultDate($_REQUEST['endDate']);
-	$order = $_REQUEST['order'];
+	$startDate = DateUtil::getDefaultDateSubtractInterval($_REQUEST['startDate'] ?? NULL, 'P1M');
+	$endDate = DateUtil::getDefaultDate($_REQUEST['endDate'] ?? NULL);
+	$order = $_REQUEST['order'] ?? NULL;
 	
 	$attendance = $reportService->getAttendanceCounts($startDate, $endDate, $order);
 	//$attendance = $reportService->getPAXAttendance($startDate, $endDate);

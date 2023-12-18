@@ -20,4 +20,5 @@ use F3\Util\Util;
 	<link href="/css/f3.css?v=<?= Util::getVersion() ?>" rel="stylesheet">
 	<link href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css" rel="stylesheet">
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script type="text/javascript" src="/js/bootstrap.min.js"></script>
 </head>

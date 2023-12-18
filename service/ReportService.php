@@ -77,6 +77,38 @@ class ReportService {
 		return $aoArray;
 	}
 	
+	public function getTopQsByAO($aoId, $count, $offset) {
+		$topQs = $this->workoutRepo->findTopQsByAO($aoId, $count, $offset);
+		
+		$qArray = array();
+		
+		foreach ($topQs as $top) {
+			$summary = new Summary();
+			$summary->setValue($top['Q_COUNT']);
+			$summary->setDescription($top['Q']);
+			
+			$qArray[] = $summary;
+		}
+		
+		return $qArray;
+	}
+
+	public function getTopPAXByAO($aoId, $count, $offset) {
+		$topPax = $this->workoutRepo->findTopPAXByAO($aoId, $count, $offset);
+		
+		$paxArray = array();
+		
+		foreach ($topPax as $top) {
+			$summary = new Summary();
+			$summary->setValue($top['PAX_COUNT']);
+			$summary->setDescription($top['PAX']);
+			
+			$paxArray[] = $summary;
+		}
+		
+		return $paxArray;
+	}
+
 	public function getAoDetailChartData($aoId, $workouts) {
 		DateUtil::defaultTimezone();
 		

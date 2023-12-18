@@ -274,6 +274,40 @@ class WorkoutRepository {
 		return $stmt->fetchAll();
 	}
 	
+	public function findTopQsByAO($aoId, $count, $offset) {
+		$stmt = $this->db->prepare('
+			select ao.DESCRIPTION as AO, m.F3_NAME as Q, count(wq.WORKOUT_ID) as Q_COUNT from WORKOUT_Q wq
+				join MEMBER m on wq.MEMBER_ID = m.MEMBER_ID
+				join WORKOUT_AO wa on wq.WORKOUT_ID = wa.WORKOUT_ID
+				join AO ao on wa.AO_ID = ao.AO_ID
+				where ao.AO_ID = ?
+				group by wq.MEMBER_ID, wa.AO_ID
+				order by Q_COUNT desc, Q asc
+				limit ? offset ?;
+		');
+
+		$stmt->execute([$aoId, $count, $offset]);
+		
+		return $stmt->fetchAll();
+	}
+
+	public function findTopPaxByAO($aoId, $count, $offset) {
+		$stmt = $this->db->prepare('
+			select ao.DESCRIPTION as AO, m.F3_NAME as PAX, count(wp.WORKOUT_ID) as PAX_COUNT from WORKOUT_PAX wp
+				join MEMBER m on wp.MEMBER_ID = m.MEMBER_ID
+				join WORKOUT_AO wa on wp.WORKOUT_ID = wa.WORKOUT_ID
+				join AO ao on wa.AO_ID = ao.AO_ID
+				where ao.AO_ID = ?
+				group by wp.MEMBER_ID, wa.AO_ID
+				order by PAX_COUNT desc, PAX asc
+				limit ? offset ?;		
+		');
+
+		$stmt->execute([$aoId, $count, $offset]);
+		
+		return $stmt->fetchAll();
+	}
+
 	public function findMostRecentWorkoutDate() {
 		$stmt = $this->db->prepare('
 			select max(WORKOUT_DATE) as MAX_DATE 

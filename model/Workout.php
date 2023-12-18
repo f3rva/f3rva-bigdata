@@ -75,7 +75,7 @@ class Workout implements \JsonSerializable {
 		$this->workoutDate = $workoutDate;
 	}
 	
-	public function jsonSerialize()
+	public function jsonSerialize(): mixed
 	{
 		return [
 				'workout' => [

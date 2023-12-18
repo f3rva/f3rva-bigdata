@@ -238,7 +238,9 @@ class WorkoutService {
 		
 		foreach ($workouts as $workout) {
 			$workoutId = $workout['WORKOUT_ID'];
-			if (is_null($workoutsArray[$workoutId])) {
+			
+			// if the key doesn't exist, we need to create the objects
+			if (!array_key_exists($workoutId, $workoutsArray)) {
 				$workoutObj = $this->createWorkoutObj($workout);
 				$workoutsArray[$workoutObj->getWorkoutId()] = $workoutObj;
 			}

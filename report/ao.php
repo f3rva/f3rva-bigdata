@@ -22,8 +22,8 @@ use F3\Util\DateUtil;
 
 <?
 	$reportService = new ReportService();
-	$startDate = DateUtil::getDefaultDateSubtractInterval($_REQUEST['startDate'], 'P1M');
-	$endDate = DateUtil::getDefaultDate($_REQUEST['endDate']);
+	$startDate = DateUtil::getDefaultDateSubtractInterval($_REQUEST['startDate'] ?? NULL, 'P1M');
+	$endDate = DateUtil::getDefaultDate($_REQUEST['endDate'] ?? NULL);
 	
 	$aoAverages = $reportService->getAverageAttendanceByAO($startDate, $endDate);
 ?>

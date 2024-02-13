@@ -30,12 +30,15 @@ use F3\Service\WorkoutService;
 	$topQs = $reportService->getTopQsByAO($aoId, 10, 0);
 	$topPax = $reportService->getTopPAXByAO($aoId, 10, 0);
 	$chartData = $reportService->getAoDetailChartData($aoId, $workouts);
+	$streakers = $reportService->getStreakingPAXMembersByAO($aoId);
+
+	$aoDescription = $aoAverages[$aoId]->getDescription();
 ?>
 
 <div class="container-fluid">
 	<div class="row">
 		<div class="col col-sm-12">
-			<h1><?= $aoAverages[$aoId]->getDescription() ?></h1>
+			<h1><?= $aoDescription ?></h1>
 		</div>
 	</div>
 	<div class="row">
@@ -57,7 +60,7 @@ use F3\Service\WorkoutService;
 					<div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
 						<div class="panel-body">
 							<p>
-								<?= $aoAverages[$aoId]->getDescription() ?> has averaged <strong><?= $aoAverages[$aoId]->getValue() ?></strong>
+								<?= $aoDescription ?> has averaged <strong><?= $aoAverages[$aoId]->getValue() ?></strong>
 								PAX members per workout since the AOs inception.
 							</p>
 						</div>
@@ -74,7 +77,7 @@ use F3\Service\WorkoutService;
 					<div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
 						<div class="panel-body">
 							<p>
-								This is the list of top workout attendees at <?= $aoAverages[$aoId]->getDescription() ?>. 
+								This is the list of top workout attendees at <?= $aoDescription ?>. 
 								Climb these rankings by posting frequently.
 							</p>
 						</div>
@@ -107,8 +110,8 @@ use F3\Service\WorkoutService;
 					<div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
 						<div class="panel-body">
 							<p>
-									This is the list of top workout leaders at <?= $aoAverages[$aoId]->getDescription() ?>. 
-									This is an elite club! Climb these rankings by leading workouts at <?= $aoAverages[$aoId]->getDescription() ?>.
+									This is the list of top workout leaders at <?= $aoDescription ?>. 
+									This is an elite club! Climb these rankings by leading workouts at <?= $aoDescription ?>.
 							</p>
 						</div>
 						<table class="table table-striped">
@@ -122,6 +125,38 @@ use F3\Service\WorkoutService;
 							<tr>
 								<td><?= $q->getDescription() ?></td>
 								<td><?= $q->getValue() ?></td>
+							</tr>
+							<?
+								}
+							?>
+						</table>
+					</div>
+				</div>
+				<div class="panel panel-default">
+					<div class="panel-heading" role="tab" id="headingFour">
+						<h4 class="panel-title">
+							<a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+								Streakers
+							</a>
+						</h4>
+					</div>
+					<div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+						<div class="panel-body">
+							<p>
+									You have to post consistently to be a streaker!  Here are the current streakers at <?= $aoDescription ?>.
+							</p>
+						</div>
+						<table class="table table-striped">
+							<tr>
+								<th>PAX</th>
+								<th>Streak</th>
+							</tr>
+							<?	
+								foreach ($streakers as $streaker) {
+							?>
+							<tr>
+								<td><?= $streaker->getDescription() ?></td>
+								<td><?= $streaker->getValue() ?></td>
 							</tr>
 							<?
 								}

@@ -56,6 +56,76 @@ class ReportService {
 	}
 
 	/**
+	 * Gets the streaking PAX members for an AO
+	 * 
+	 * @return array of Member
+	 */
+	public function getStreakingPAXMembersByAO($aoId) {
+		$numMonths = 6;
+		$recentWorkoutAttendees = $this->workoutRepo->findRecentWorkoutAttendeesByAO($aoId, $numMonths);
+
+		// loop through the list of members, keeping track of members from the most recent workout
+		// for each member that was in the most recent workout, recursively
+		$streakers = array();
+		$workouts = array();
+
+		$mostRecentWorkout = '';
+		if (count($recentWorkoutAttendees) > 0) {
+			$mostRecentWorkout = $recentWorkoutAttendees[0]['WORKOUT_ID'];
+		}
+
+		foreach ($recentWorkoutAttendees as $attendee) {
+			$workoutId = $attendee['WORKOUT_ID'];
+			$workoutDate = $attendee['WORKOUT_DATE'];
+			$memberId = $attendee['MEMBER_ID'];
+			$pax = $attendee['PAX'];
+
+			// if the workout array doesn't have this workoutId as a key, add it and initialize an array
+			if (!array_key_exists($workoutId, $workouts)) {
+				$workouts[$workoutId] = array();
+			}
+			$workouts[$workoutId][$memberId] = $pax;
+
+			// if current workout is the most recent workout, add to the streakers array
+			if ($workoutId == $mostRecentWorkout) {
+				$summary = new Summary();
+				$summary->setId($memberId);
+				$summary->setValue(1);
+				$summary->setDescription($pax);
+				$streakers[$memberId] = $summary;
+			}
+		}
+
+		// loop through all streakers and recursively check workouts array to see if the member id exists
+		// in the next workout
+		foreach ($streakers as $memberId => $streaker) {
+			$streaker->setValue($this->getStreakingPAX($memberId, array_values($workouts), $streaker->getValue()));
+		}
+
+		// sort the $streakers array by the value in the Summary object
+		usort($streakers, function($a, $b) {
+			return $b->getValue() - $a->getValue();
+		});
+
+		return $streakers;
+	}
+
+	private function getStreakingPAX($memberId, $workouts, $streak) {
+		// if we ran out of workouts, return the current streak
+		if (count($workouts) <= $streak) {
+			return $streak;
+		}
+
+		// if the member exists in the next workout, increment the streak and recursively call the function
+		if (array_key_exists($memberId, $workouts[$streak])) {
+			$streak++;
+			return $this->getStreakingPAX($memberId, $workouts, $streak);
+		}
+
+		return $streak;
+	}
+	
+	/**
 	 * Gets the average attendance by AO
 	 *
 	 * @return array of Member

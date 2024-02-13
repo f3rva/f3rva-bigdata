@@ -179,6 +179,28 @@ class WorkoutRepository {
 		return $stmt->fetchAll();
 	}
 	
+	public function findRecentWorkoutAttendeesByAO($aoId, $numMonths) {
+		$stmt = $this->db->prepare('
+			select w.WORKOUT_ID, w.WORKOUT_DATE, mp.MEMBER_ID as MEMBER_ID, mp.F3_NAME as PAX from WORKOUT w
+			left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
+			left outer join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
+			left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
+			left outer join AO ao on wao.AO_ID = ao.AO_ID
+			where w.WORKOUT_ID in (
+				select w.WORKOUT_ID from WORKOUT w
+					left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
+					left outer join AO ao on wao.AO_ID = ao.AO_ID
+					where ao.AO_ID = ?
+					and w.WORKOUT_DATE >= DATE_SUB(CURDATE(), INTERVAL ? MONTH)
+			)
+			order by w.WORKOUT_DATE desc, PAX asc
+		');
+
+		$stmt->execute([$aoId, $numMonths]);
+			
+		return $stmt->fetchAll();
+	}
+
 	public function findWorkoutMember($workoutId, $memberId) {
 		$stmt = $this->db->prepare('
 			select wp.WORKOUT_ID, wp.MEMBER_ID, m.F3_NAME from WORKOUT_PAX wp

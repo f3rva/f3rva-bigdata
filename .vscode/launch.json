@@ -16,7 +16,7 @@
         "-d",
         "short_open_tag=true"
       ],
-      //"port": 9000,
+      "port": 9000,
       "serverReadyAction": {
         "action": "openExternally"
       }

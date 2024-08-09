@@ -202,6 +202,33 @@ class MemberRepository {
 		$stmt->execute([$memberId, $associatedMemberId]);
 	}
 	
+	public function createAliasAuditTrail($associatedMemberId) {
+		$this->createAliasAuditTrailPax($associatedMemberId);
+		$this->createAliasAuditTrailQ($associatedMemberId);
+	}
+
+	public function createAliasAuditTrailPax($associatedMemberId) {
+		$stmt = $this->db->prepare('
+			insert into MEMBER_ALIAS_AUDIT (OLD_MEMBER_ID, OLD_F3_NAME, WORKOUT_ID, MEMBER_TYPE)
+				select m.MEMBER_ID, m.F3_NAME, wp.WORKOUT_ID, ? from WORKOUT_PAX wp
+					join MEMBER m on wp.MEMBER_ID = m.MEMBER_ID
+							where wp.MEMBER_ID=?;        
+		');
+
+		$stmt->execute(['PAX', $associatedMemberId]);
+	}
+
+	public function createAliasAuditTrailQ($associatedMemberId) {
+		$stmt = $this->db->prepare('
+			insert into MEMBER_ALIAS_AUDIT (OLD_MEMBER_ID, OLD_F3_NAME, WORKOUT_ID, MEMBER_TYPE)
+				select m.MEMBER_ID, m.F3_NAME, wq.WORKOUT_ID, ? from WORKOUT_Q wq
+					join MEMBER m on wq.MEMBER_ID = m.MEMBER_ID
+							where wq.MEMBER_ID=?;        
+		');
+
+		$stmt->execute(['Q', $associatedMemberId]);
+	}
+
 	public function relinkWorkoutPax($memberId, $associatedMemberId) {
 		$stmt = $this->db->prepare('
 			update WORKOUT_PAX

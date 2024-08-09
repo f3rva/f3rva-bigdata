@@ -97,6 +97,9 @@ class MemberService {
 		try {
 			$db->beginTransaction();
 			
+			// create an audit trail with the previous entries, in case we need to revert
+			$this->memberRepo->createAliasAuditTrail($associatedMemberId);
+
 			// create the alias if it doesn't already exist
 			if (!$this->memberRepo->findExistingAlias($memberId, $associatedMemberId)) {
 				$this->memberRepo->createAlias($memberId, $associatedMemberId);

@@ -30,5 +30,3 @@ class Summary {
 		$this->value = $value;
 	}
 }
-
-?>

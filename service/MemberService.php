@@ -139,4 +139,3 @@ class MemberService {
 		return $member;
 	}
 }
-?>

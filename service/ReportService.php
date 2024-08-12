@@ -273,5 +273,3 @@ class ReportService {
 		return $totalsArray;
 	}
 }
-
-?>

@@ -37,4 +37,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
 	$workoutService = new WorkoutService();
 	$workout = $workoutService->refreshWorkout($data->workoutId);
 }
-?>

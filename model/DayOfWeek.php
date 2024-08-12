@@ -54,5 +54,3 @@ class DayOfWeek {
 		return $dayText;
 	}
 }
-
-?>

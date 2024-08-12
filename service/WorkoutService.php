@@ -341,5 +341,3 @@ class WorkoutService {
 		return true;
 	}
 }
-
-?>

@@ -44,5 +44,3 @@ class ChartData {
 		$this->series = $series;
 	}
 }
-
-?>

@@ -13,8 +13,6 @@ if (!defined('__ROOT__')) {
 class Util {
     
     public static function getVersion() {
-        return '1_0_0';
+        return '1_1_0';
     }
 }
-
-?>

@@ -91,5 +91,3 @@ class Workout implements \JsonSerializable {
 		];
 	}
 }
-
-?>

@@ -268,6 +268,3 @@ class MemberRepository {
 		$stmt->execute([$workoutId, $associatedMemberId]);
 	}
 }
-
-
-?>

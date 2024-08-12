@@ -37,5 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	
 	$workoutService = new WorkoutService();
 	$workout = $workoutService->addWorkout($data);
+
+    echo '{ "id": ' . $workout . ' }';
 }
 ?>

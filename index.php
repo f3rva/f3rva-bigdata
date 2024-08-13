@@ -24,7 +24,6 @@ use F3\Util\DateUtil;
 	$workoutService = new WorkoutService();
 	$workouts = $workoutService->getWorkouts(NULL, 10);
 ?>
-
 <table class="table table-striped">
 	<thead>
 		<tr>
@@ -66,9 +65,9 @@ use F3\Util\DateUtil;
 <div id="loading">
 </div>
 
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-	<script src="/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script src="/js/jquery-3.7.1/jquery-3.7.1.min.js"></script>
+	<script src="/js/bootstrap-5.3.3/bootstrap.bundle.min.js"></script>
 	<script src="/js/f3.home.js"></script>
 </body>
 </html>
-

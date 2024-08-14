@@ -279,10 +279,14 @@ class WorkoutService {
 		$workoutObj->setQ($qArray);
 		
 		$workoutObj->setBackblastUrl($workout['BACKBLAST_URL']);
-		$workoutObj->setPaxCount($workout['PAX_COUNT']);
 		$workoutObj->setTitle($workout['TITLE']);
 		$workoutObj->setWorkoutId($workout['WORKOUT_ID']);
 		$workoutObj->setWorkoutDate($workout['WORKOUT_DATE']);
+
+		// only set if PAX_COUNT is there
+		if (array_key_exists('PAX_COUNT', $workout)) {
+			$workoutObj->setPaxCount($workout['PAX_COUNT']);
+		}
 		
 		return $workoutObj;
 	}

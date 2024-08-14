@@ -53,7 +53,8 @@ use F3\Service\WorkoutService;
 ?>
 </table>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="/js/bootstrap.min.js"></script>
+<script src="/js/jquery-3.7.1/jquery-3.7.1.min.js"></script>
+<script src="/js/bootstrap-5.3.3/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

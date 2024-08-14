@@ -90,11 +90,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	</div>
 </div>
 
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-	<script src="/js/bootstrap.min.js"></script>
-	<script src="/js/f3.admin.managePax.js?v=<?= Util::getVersion() ?>"></script>
-	<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-	<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
+<script src="/js/jquery-3.7.1/jquery-3.7.1.min.js"></script>
+<script src="/js/bootstrap-5.3.3/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/2.1.3/js/dataTables.js"></script>
+<script src="/js/f3.admin.managePax.js?v=<?= Util::getVersion() ?>"></script>
 </body>
 </html>
 

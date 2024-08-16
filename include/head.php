@@ -19,6 +19,6 @@ use F3\Util\Util;
 
 	<link href="/css/bootstrap-5.3.3/bootstrap.min.css" rel="stylesheet">
 	<link href="/css/f3.css?v=<?= Util::getVersion() ?>" rel="stylesheet">
-	<link rel="stylesheet" href="https://cdn.datatables.net/2.1.3/css/dataTables.dataTables.css" />
-	<link rel="shortcut icon" href="/assets/cropped-f3-150x150.png" type="image/x-icon">
+	<link href="https://cdn.datatables.net/2.1.3/css/dataTables.bootstrap5.css" rel="stylesheet">
+ 	<link rel="shortcut icon" href="/assets/cropped-f3-150x150.png" type="image/x-icon">
 </head>

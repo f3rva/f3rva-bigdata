@@ -51,11 +51,13 @@ use F3\Service\WorkoutService;
 		<div class="col col-sm-4">
 			<h4>Workouts</h4>
 			<table class="table table-striped">
+			<thead>
 				<tr>
 					<th>Date</th>
 					<th>Title</th>
 					<th>AO</th>
 				</tr>
+			</thead>
 			<?	
 			foreach ($paxWorkouts as $workout) {
 			?>
@@ -78,11 +80,13 @@ use F3\Service\WorkoutService;
 		<div class="col col-sm-4">
 			<h4>Qs</h4>
 			<table class="table table-striped">
+			<thead>
 				<tr>
 					<th>Date</th>
 					<th>Title</th>
 					<th>AO</th>
 				</tr>
+			</thead>
 			<?	
 			foreach ($qWorkouts as $workout) {
 			?>

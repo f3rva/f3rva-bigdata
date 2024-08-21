@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <div class="container-fluid">
-	<div class="row">
+	<div class="row mt-2">
 		<div class="col-md-4">
 			<table id="members" class="table table-striped table-hover">
 				<thead>
@@ -76,15 +76,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		<div class="col-md-3">
 			<form method="post" action="managePax.php">
 				<input type="hidden" name="action" value="merge" />
-				<div class="form-group">
+				<label for="memberId" class="help-block">ID of the primary user</>
+				<div class="form-group mt-2">
 					<input type="text" name="memberId" class="form-control" id="memberId" placeholder="Primary ID">
-					<p class="help-block">ID of the primary user</p>
 				</div>
-				<div class="form-group">
+				<label for="associatedMemberId" class="mt-2">ID that should become an alias for the primary user</label>
+				<div class="form-group mt-2 mb-2">
 					<input type="text" name="associatedMemberId" class="form-control" id="associatedMemberId" placeholder="Alias ID">
-					<p class="help-block">ID of the record that should become an alias for the primary user above</p>
 				</div>
-				<button type="submit" class="btn btn-default">Create Alias</button>
+				<button type="submit" class="btn btn-secondary">Create Alias</button>
 			</form>
 		</div>		
 	</div>

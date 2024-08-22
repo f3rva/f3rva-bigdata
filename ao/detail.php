@@ -191,43 +191,44 @@ use F3\Service\WorkoutService;
 	</div>
 </div>
 
-	<script src="/js/jquery-3.7.1/jquery-3.7.1.min.js"></script>
-	<script src="/js/bootstrap-5.3.3/bootstrap.min.js"></script>
-	
-	<script>
-		google.charts.load('current', {packages: ['corechart', 'line']});
-		google.charts.setOnLoadCallback(drawChart);
-	
-		function drawChart() {
-			var data = new google.visualization.DataTable();
-			data.addColumn('string', 'Day');
-			<? foreach ($chartData->getXLabels() as $label) { ?>
-				data.addColumn('number', '<?= $label ?>');
-			<? } ?>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="/js/jquery-3.7.1/jquery-3.7.1.min.js"></script>
+<script src="/js/bootstrap-5.3.3/bootstrap.min.js"></script>
 
-			data.addRows([
-				<?= $chartData->getSeriesImploded() ?>
-			]);
-	
-			var options = {
-				animation: {
-					duration: 800,
-					startup: true
-				},
-				hAxis: {
-					title: 'Date'
-				},
-				vAxis: {
-					title: 'Attendance'
-				},
-				colors: ['#a52714', '#097138'],
-				interpolateNulls: true
-			};
-	
-			var chart = new google.visualization.LineChart(document.getElementById('chartContainer'));
-			chart.draw(data, options);
-		}
-	</script>
+<script>
+	google.charts.load('current', {packages: ['corechart', 'line']});
+	google.charts.setOnLoadCallback(drawChart);
+
+	function drawChart() {
+		var data = new google.visualization.DataTable();
+		data.addColumn('string', 'Day');
+		<? foreach ($chartData->getXLabels() as $label) { ?>
+			data.addColumn('number', '<?= $label ?>');
+		<? } ?>
+
+		data.addRows([
+			<?= $chartData->getSeriesImploded() ?>
+		]);
+
+		var options = {
+			animation: {
+				duration: 800,
+				startup: true
+			},
+			hAxis: {
+				title: 'Date'
+			},
+			vAxis: {
+				title: 'Attendance'
+			},
+			colors: ['#a52714', '#097138'],
+			interpolateNulls: true
+		};
+
+		var chart = new google.visualization.LineChart(document.getElementById('chartContainer'));
+		chart.draw(data, options);
+	}
+</script>
 </body>
 </html>
 

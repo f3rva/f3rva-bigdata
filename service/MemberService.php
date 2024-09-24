@@ -4,11 +4,14 @@ namespace F3\Service;
 if (!defined('__ROOT__')) {
 	define('__ROOT__', dirname(dirname(dirname(__FILE__))));
 }
+require_once(__ROOT__ . '/model/AliasRequest.php');
 require_once(__ROOT__ . '/model/Member.php');
 require_once(__ROOT__ . '/model/MemberStats.php');
 require_once(__ROOT__ . '/repo/Database.php');
 require_once(__ROOT__ . '/repo/MemberRepo.php');
 
+use F3\Model\AliasRequest;
+use F3\Model\AliasRequestStatus;
 use F3\Model\Member;
 use F3\Repo\Database;
 use F3\Repo\MemberRepository;
@@ -26,7 +29,7 @@ class MemberService {
 		$this->memberRepo = new MemberRepository();
 	}
 	
-	public function getMembers() {
+	public function getMembers(): array {
 		$membersResult = $this->memberRepo->findAll();
 		$membersArray = array();
 		
@@ -130,8 +133,56 @@ class MemberService {
 			error_log($e);
 		}
 	}
+
+	public function requestAlias($primaryMemberId, $aliasMemberId) {
+		// create a new record in the database as a staging area for requested aliases
+		// this will be used to track the request and allow for approval
+		// the request will be sent to the Nantan for approval
+		// the Nantan will have the ability to approve or deny the request
+		// if approved, the alias will be created
+		// if denied, the request will be removed
+
+		$db = Database::getInstance()->getDatabase();
+		try {
+			$db->beginTransaction();
+			
+			$this->memberRepo->requestAlias($primaryMemberId, $aliasMemberId);
+
+			$db->commit();
+		}
+		catch (\Exception $e) {
+			$db->rollBack();
+			error_log($e);
+		}
+	}
+
+	/**
+	 * Summary of getAliasesByStatus
+	 * @param \F3\Model\AliasRequestStatus $status
+	 * @return array
+	 */
+	public function getAliasesByStatus($status): array {
+		$aliasesResult = $this->memberRepo->findAliasesByStatus($status);
+		$aliasesArray = array();
+		
+		foreach ($aliasesResult as $aliasResult) {
+			$member = $this->createMember($aliasResult["MEMBER_ID"], $aliasResult["F3_NAME"]);
+			$alias = $this->createMember($aliasResult["ALIAS_ID"], $aliasResult["ALIAS_NAME"]);
+			$aliasRequestStatus = AliasRequestStatus::enumFrom($aliasResult["STATUS"]);
+			$aliasRequest = new AliasRequest($member, $alias, $aliasRequestStatus);
+			$aliasesArray[] = $aliasRequest;
+		}
+		
+		return $aliasesArray;
+	}
 	
-	private function createMember($memberId, $f3Name) {
+	/**
+	 * Summary of createMember
+	 * @param mixed $memberId
+	 * @param mixed $f3Name
+	 * @return \F3\Model\Member
+	 */
+	private function createMember($memberId, $f3Name): Member {
 		$member = new Member();
 		$member->setMemberId($memberId);
 		$member->setF3Name($f3Name);

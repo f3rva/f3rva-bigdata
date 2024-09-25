@@ -28,3 +28,27 @@ div#loading {
 label {
     font-weight: 700;
 }
+
+.autocomplete-suggestions {
+    border-radius: 5px;
+    border: 1px solid #999;
+    background: #FFF;
+    cursor: default;
+    margin-top: 5px;
+    overflow: auto;
+}
+
+.autocomplete-suggestion {
+    padding: 2px 5px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.autocomplete-selected {
+    background: #F0F0F0;
+}
+
+.autocomplete-suggestions strong {
+    font-weight: normal;
+    color: #3399FF;
+}

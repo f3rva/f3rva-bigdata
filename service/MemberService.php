@@ -7,15 +7,17 @@ if (!defined('__ROOT__')) {
 require_once(__ROOT__ . '/model/AliasRequest.php');
 require_once(__ROOT__ . '/model/Member.php');
 require_once(__ROOT__ . '/model/MemberStats.php');
+require_once(__ROOT__ . '/model/Response.php');
 require_once(__ROOT__ . '/repo/Database.php');
 require_once(__ROOT__ . '/repo/MemberRepo.php');
 
 use F3\Model\AliasRequest;
 use F3\Model\AliasRequestStatus;
 use F3\Model\Member;
+use F3\Model\MemberStats;
+use F3\Model\Response;
 use F3\Repo\Database;
 use F3\Repo\MemberRepository;
-use F3\Model\MemberStats;
 
 /**
  * Service class encapsulating business logic for members.
@@ -134,7 +136,13 @@ class MemberService {
 		}
 	}
 
-	public function requestAlias($primaryMemberId, $aliasMemberId) {
+	/**
+	 * Requests an alias for a member
+	 * @param mixed $primaryMemberId	the parent member id
+	 * @param mixed $aliasMemberId		the alias member id
+	 * @return int	0 for success, 1 for duplicate, 2 for other error
+	 */
+	public function requestAlias($primaryMemberId, $aliasMemberId): int {
 		// create a new record in the database as a staging area for requested aliases
 		// this will be used to track the request and allow for approval
 		// the request will be sent to the Nantan for approval
@@ -142,7 +150,9 @@ class MemberService {
 		// if approved, the alias will be created
 		// if denied, the request will be removed
 
+		$return = Response::SUCCESS;
 		$db = Database::getInstance()->getDatabase();
+
 		try {
 			$db->beginTransaction();
 			
@@ -152,8 +162,16 @@ class MemberService {
 		}
 		catch (\Exception $e) {
 			$db->rollBack();
-			error_log($e);
+			if ($e->getCode() == 23000) {
+				$return = Response::DUPLICATE;
+			}
+			else {
+				error_log(message: $e);
+				$return = Response::ERROR;
+			}
 		}
+
+		return $return;
 	}
 
 	/**

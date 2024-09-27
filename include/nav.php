@@ -1,3 +1,14 @@
+<?php
+namespace F3;
+
+if (!defined('__ROOT__')) {
+	define('__ROOT__', dirname(__FILE__));
+}
+require_once(__ROOT__ . '/util/Util.php');
+
+use F3\Util\Util;
+?>
+
 <nav class="navbar navbar-dark bg-dark navbar-expand-lg">
   <div class="container-fluid">
     <a class="navbar-brand" href="/">
@@ -28,6 +39,26 @@
           </ul>
         </li>
       </ul>
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <? if (Util::isLoggedIn()) { ?>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Admin
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/admin/managePax.php">Manage Pax</a></li>
+            </ul>
+          </li>
+        <? } ?>
+        <li class="nav-item">
+          <? if (Util::isLoggedIn()) { ?>
+            <a class="nav-link" href="/logout.php">Logout</a>
+          <? } else { ?>
+            <a class="nav-link" href="/login.php">Login</a>
+          <? } ?>
+        </li>
+      </ul>
+
     </div>
   </div>
 </nav>

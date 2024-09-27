@@ -155,8 +155,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script src="/js/jquery-3.7.1/jquery-3.7.1.min.js"></script>
 <script src="/js/bootstrap-5.3.3/bootstrap.bundle.min.js"></script>
 <script src="/js/jquery.autocomplete.min.js"></script>
-<script src="https://cdn.datatables.net/2.1.3/js/dataTables.js"></script>
-<script src="https://cdn.datatables.net/2.1.3/js/dataTables.bootstrap5.js"></script>
 <script src="/js/f3.self-service.alias.js?v=<?= Util::getVersion() ?>"></script>
 
 </body>

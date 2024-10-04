@@ -21,5 +21,3 @@ class AO {
 		$this->description = $description;
 	}
 }
-
-?>

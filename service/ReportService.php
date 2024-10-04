@@ -42,7 +42,7 @@ class ReportService {
 	public function getWorkoutsByDayOfWeek($startDate, $endDate) {
 		$daysOfWeek = $this->workoutRepo->findWorkoutsGroupByDayOfWeek($startDate, $endDate);
 		
-		$daysArray = array();
+		$daysArray = [];
 		
 		foreach ($daysOfWeek as $dayOfWeek) {
 			$dayOfWeekObj = new DayOfWeek();
@@ -66,8 +66,8 @@ class ReportService {
 
 		// loop through the list of members, keeping track of members from the most recent workout
 		// for each member that was in the most recent workout, recursively
-		$streakers = array();
-		$workouts = array();
+		$streakers = [];
+		$workouts = [];
 
 		$mostRecentWorkout = '';
 		if (count($recentWorkoutAttendees) > 0) {
@@ -82,7 +82,7 @@ class ReportService {
 
 			// if the workout array doesn't have this workoutId as a key, add it and initialize an array
 			if (!array_key_exists($workoutId, $workouts)) {
-				$workouts[$workoutId] = array();
+				$workouts[$workoutId] = [];
 			}
 			$workouts[$workoutId][$memberId] = $pax;
 
@@ -133,7 +133,7 @@ class ReportService {
 	public function getAverageAttendanceByAO($startDate, $endDate) {
 		$aoAverages = $this->workoutRepo->findAverageAttendanceByAO($startDate, $endDate);
 		
-		$aoArray = array();
+		$aoArray = [];
 		
 		foreach ($aoAverages as $aoAverage) {
 			$summary = new Summary();
@@ -150,7 +150,7 @@ class ReportService {
 	public function getTopQsByAO($aoId, $count, $offset) {
 		$topQs = $this->workoutRepo->findTopQsByAO($aoId, $count, $offset);
 		
-		$qArray = array();
+		$qArray = [];
 		
 		foreach ($topQs as $top) {
 			$summary = new Summary();
@@ -166,7 +166,7 @@ class ReportService {
 	public function getTopPAXByAO($aoId, $count, $offset) {
 		$topPax = $this->workoutRepo->findTopPAXByAO($aoId, $count, $offset);
 		
-		$paxArray = array();
+		$paxArray = [];
 		
 		foreach ($topPax as $top) {
 			$summary = new Summary();
@@ -183,14 +183,14 @@ class ReportService {
 		DateUtil::defaultTimezone();
 		
 		$chartData = new ChartData();
-		$labels = array();
-		$series = array();
+		$labels = [];
+		$series = [];
 		
 		// lookup the AO name
 		$ao = $this->workoutRepo->findAo($aoId);
 		
 		foreach (array_reverse($workouts) as $workout) {
-			$dateArray = array();
+			$dateArray = [];
 			$rawDate = new \DateTime($workout->getWorkoutDate());
 			$year = $rawDate->format("Y");
 			$labels[$year] = $year;
@@ -198,7 +198,7 @@ class ReportService {
 			
 			// if the day doesn't exist, create a new array to store multiple years
 			if (!array_key_exists($day, $series)) {
-				$series[$day] = array();
+				$series[$day] = [];
 			}
 
 			$series[$day][$year] = $workout->getPaxCount();
@@ -226,14 +226,14 @@ class ReportService {
 		DateUtil::defaultTimezone();
 		
 		$chartData = new ChartData();
-		$labels = array();
-		$series = array();
+		$labels = [];
+		$series = [];
 		
 		// this needs to be refactored.  Not very efficient
 		foreach ($qWorkouts as $workout) {
 			foreach ($workout->getAo() as $aoId => $ao) {
-				if (is_null($series[$aoId])) {
-					$series[$aoId] = array($ao, 0, 0);
+				if (!isset($series[$aoId])) {
+					$series[$aoId] = [$ao, 0, 0];
 				}
 				
 				$series[$aoId][1] = $series[$aoId][1] + 1;
@@ -241,8 +241,8 @@ class ReportService {
 		}
 		foreach ($paxWorkouts as $workout) {
 			foreach ($workout->getAo() as $aoId => $ao) {
-				if (is_null($series[$aoId])) {
-					$series[$aoId] = array($ao, 0, 0);
+				if (!isset($series[$aoId])) {
+					$series[$aoId] = [$ao, 0, 0];
 				}
 				
 				$series[$aoId][2] = $series[$aoId][2] + 1;
@@ -257,7 +257,7 @@ class ReportService {
 	public function getAttendanceCounts($startDate, $endDate, $order) {
 		$paxTotals = $this->memberRepo->findAttendanceCounts($startDate, $endDate, $order);
 		
-		$totalsArray = array();
+		$totalsArray = [];
 		
 		foreach ($paxTotals as $total) {
 			$stats = new MemberStats();
@@ -273,5 +273,3 @@ class ReportService {
 		return $totalsArray;
 	}
 }
-
-?>

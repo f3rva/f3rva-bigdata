@@ -30,29 +30,31 @@ use F3\Util\DateUtil;
 
 <div class="container-fluid">
 	<div class="row">
-		<div class="col col-sm-3">
+		<div class="col col-sm-3 mt-2">
 			<form method="get" action="dayOfWeek.php">
-				<div class="form-group row">
+				<div class="mt-2">
 					<label class="col-md-4 col-form-label" for="startDate">Start</label>
 					<div class="col-md-8">
 						<input type="date" name="startDate" class="form-control" id="startDate" value="<?= $startDate ?>">
 					</div>
 				</div>
-				<div class="form-group row">
+				<div class="mb-2">
 					<label class="col-md-4 col-form-label" for="endDate">End</label>
 					<div class="col-md-8">
 						<input type="date" name="endDate" class="form-control" id="endDate" value="<?= $endDate ?>">
 					</div>
 				</div>
-				<button type="submit" class="btn btn-default">Filter</button>
+				<button type="submit" class="btn btn-secondary">Filter</button>
 			</form>
 		</div>
-		<div class="col col-sm-3">
-			<table class="table table-striped">
+		<div class="col col-sm-3 mt-3">
+			<table id="dow" class="table table-striped">
+			<thead>
 				<tr>
 					<th>Day of Week</th>
 					<th>PAX Count</th>
 				</tr>
+			</thead>
 			<?	
 				foreach ($daysOfWeek as $dayOfWeek) {
 			?>
@@ -70,8 +72,9 @@ use F3\Util\DateUtil;
 	</div>
 </div>
 
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-	<script src="/js/bootstrap.min.js"></script>
+<script src="/js/jquery-3.7.1/jquery-3.7.1.min.js"></script>
+<script src="/js/bootstrap-5.3.3/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
 

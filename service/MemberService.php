@@ -4,15 +4,20 @@ namespace F3\Service;
 if (!defined('__ROOT__')) {
 	define('__ROOT__', dirname(dirname(dirname(__FILE__))));
 }
+require_once(__ROOT__ . '/model/AliasRequest.php');
 require_once(__ROOT__ . '/model/Member.php');
 require_once(__ROOT__ . '/model/MemberStats.php');
+require_once(__ROOT__ . '/model/Response.php');
 require_once(__ROOT__ . '/repo/Database.php');
 require_once(__ROOT__ . '/repo/MemberRepo.php');
 
+use F3\Model\AliasRequest;
+use F3\Model\AliasRequestStatus;
 use F3\Model\Member;
+use F3\Model\MemberStats;
+use F3\Model\Response;
 use F3\Repo\Database;
 use F3\Repo\MemberRepository;
-use F3\Model\MemberStats;
 
 /**
  * Service class encapsulating business logic for members.
@@ -26,7 +31,7 @@ class MemberService {
 		$this->memberRepo = new MemberRepository();
 	}
 	
-	public function getMembers() {
+	public function getMembers(): array {
 		$membersResult = $this->memberRepo->findAll();
 		$membersArray = array();
 		
@@ -120,8 +125,33 @@ class MemberService {
 			// re-assign existing aliases
 			$this->memberRepo->relinkMemberAlias($memberId, $associatedMemberId);
 			
+			// approve alias request if it exists
+			$this->memberRepo->updateAliasRequest($memberId, $associatedMemberId, AliasRequestStatus::APPROVED);
+			
 			// delete from member
 			$this->memberRepo->delete($associatedMemberId);
+
+			$db->commit();
+		}
+		catch (\Exception $e) {
+			$db->rollBack();
+			error_log($e);
+		}
+	}
+
+	/**
+	 * Rejects an alias request
+	 * @param mixed $memberId							the parent member id
+	 * @param mixed $associatedMemberId		the alias member id
+	 * @return void
+	 */
+	public function rejectAlias($memberId, $associatedMemberId) {
+		$db = Database::getInstance()->getDatabase();
+		try {
+			$db->beginTransaction();
+			
+			// reject the alias request
+			$this->memberRepo->updateAliasRequest($memberId, $associatedMemberId, AliasRequestStatus::REJECTED);
 			
 			$db->commit();
 		}
@@ -130,8 +160,70 @@ class MemberService {
 			error_log($e);
 		}
 	}
+
+	/**
+	 * Requests an alias for a member
+	 * @param mixed $primaryMemberId	the parent member id
+	 * @param mixed $aliasMemberId		the alias member id
+	 * @return int	0 for success, 1 for duplicate, 2 for other error
+	 */
+	public function requestAlias($primaryMemberId, $aliasMemberId): int {
+		// create a new record in the database as a staging area for requested aliases
+		// this will be used to track the request and allow for approval
+		// the request will be sent to the Nantan for approval
+		// the Nantan will have the ability to approve or deny the request
+
+		$return = Response::SUCCESS;
+		$db = Database::getInstance()->getDatabase();
+
+		try {
+			$db->beginTransaction();
+			
+			$this->memberRepo->requestAlias($primaryMemberId, $aliasMemberId);
+
+			$db->commit();
+		}
+		catch (\Exception $e) {
+			$db->rollBack();
+			if ($e->getCode() == 23000) {
+				$return = Response::DUPLICATE;
+			}
+			else {
+				error_log(message: $e);
+				$return = Response::ERROR;
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Summary of getAliasesByStatus
+	 * @param \F3\Model\AliasRequestStatus $status
+	 * @return array
+	 */
+	public function getAliasesByStatus($status): array {
+		$aliasesResult = $this->memberRepo->findAliasesByStatus($status);
+		$aliasesArray = array();
+		
+		foreach ($aliasesResult as $aliasResult) {
+			$member = $this->createMember($aliasResult["MEMBER_ID"], $aliasResult["F3_NAME"]);
+			$alias = $this->createMember($aliasResult["ALIAS_ID"], $aliasResult["ALIAS_NAME"]);
+			$aliasRequestStatus = AliasRequestStatus::enumFrom($aliasResult["STATUS"]);
+			$aliasRequest = new AliasRequest($member, $alias, $aliasRequestStatus);
+			$aliasesArray[] = $aliasRequest;
+		}
+		
+		return $aliasesArray;
+	}
 	
-	private function createMember($memberId, $f3Name) {
+	/**
+	 * Summary of createMember
+	 * @param mixed $memberId
+	 * @param mixed $f3Name
+	 * @return \F3\Model\Member
+	 */
+	private function createMember($memberId, $f3Name): Member {
 		$member = new Member();
 		$member->setMemberId($memberId);
 		$member->setF3Name($f3Name);
@@ -139,4 +231,3 @@ class MemberService {
 		return $member;
 	}
 }
-?>

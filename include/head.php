@@ -14,11 +14,11 @@ use F3\Util\Util;
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
+
 	<title>F3RVA</title>
 
-	<link href="/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/css/bootstrap-5.3.3/bootstrap.min.css" rel="stylesheet">
 	<link href="/css/f3.css?v=<?= Util::getVersion() ?>" rel="stylesheet">
-	<link href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css" rel="stylesheet">
-	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-	<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+	<link href="https://cdn.datatables.net/2.1.3/css/dataTables.bootstrap5.css" rel="stylesheet">
+ 	<link rel="shortcut icon" href="/assets/cropped-f3-150x150.png" type="image/x-icon">
 </head>

@@ -49,5 +49,3 @@ class Database
         return $this->_db;
     }
 }
-
-?>

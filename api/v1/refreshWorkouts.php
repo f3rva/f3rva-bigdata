@@ -41,4 +41,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
 	$workouts = $workoutService->refreshWorkouts($data->numDays);
 	echo json_encode($workouts);
 }
-?>

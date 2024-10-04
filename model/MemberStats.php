@@ -48,5 +48,3 @@ class MemberStats {
 		$this->qRatio = $qRatio;
 	}
 }
-
-?>

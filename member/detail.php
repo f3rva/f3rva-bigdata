@@ -51,11 +51,13 @@ use F3\Service\WorkoutService;
 		<div class="col col-sm-4">
 			<h4>Workouts</h4>
 			<table class="table table-striped">
+			<thead>
 				<tr>
 					<th>Date</th>
 					<th>Title</th>
 					<th>AO</th>
 				</tr>
+			</thead>
 			<?	
 			foreach ($paxWorkouts as $workout) {
 			?>
@@ -78,11 +80,13 @@ use F3\Service\WorkoutService;
 		<div class="col col-sm-4">
 			<h4>Qs</h4>
 			<table class="table table-striped">
+			<thead>
 				<tr>
 					<th>Date</th>
 					<th>Title</th>
 					<th>AO</th>
 				</tr>
+			</thead>
 			<?	
 			foreach ($qWorkouts as $workout) {
 			?>
@@ -117,8 +121,9 @@ use F3\Service\WorkoutService;
 	</div>
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="/js/jquery-3.7.1/jquery-3.7.1.min.js"></script>
+<script src="/js/bootstrap-5.3.3/bootstrap.bundle.min.js"></script>
 
 <script type="text/javascript">
 	google.charts.load('current', {'packages':['bar']});

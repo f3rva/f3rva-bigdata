@@ -4,6 +4,7 @@ namespace F3;
 if (!defined('__ROOT__')) {
 	define('__ROOT__', dirname(dirname(__FILE__)));
 }
+require_once(__ROOT__ . '/auth.php');
 require_once(__ROOT__ . '/service/MemberService.php');
 require_once(__ROOT__ . '/util/Util.php');
 
@@ -50,7 +51,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <div class="container-fluid">
-	<div class="row">
+	<div class="row mt-2">
+		<div class="col-md-3">
+			<form method="post" action="managePax.php">
+				<input type="hidden" name="action" value="merge" />
+				<label for="memberId" class="help-block">ID of the primary user</>
+				<div class="form-group mt-2">
+					<input type="text" name="memberId" class="form-control" id="memberId" placeholder="Primary ID">
+				</div>
+				<label for="associatedMemberId" class="mt-2">ID that should become an alias for the primary user</label>
+				<div class="form-group mt-2 mb-2">
+					<input type="text" name="associatedMemberId" class="form-control" id="associatedMemberId" placeholder="Alias ID">
+				</div>
+				<button type="submit" class="btn btn-secondary">Create Alias</button>
+			</form>
+		</div>		
 		<div class="col-md-4">
 			<table id="members" class="table table-striped table-hover">
 				<thead>
@@ -73,28 +88,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				</tbody>
 			</table>
 		</div>
-		<div class="col-md-3">
-			<form method="post" action="managePax.php">
-				<input type="hidden" name="action" value="merge" />
-				<div class="form-group">
-					<input type="text" name="memberId" class="form-control" id="memberId" placeholder="Primary ID">
-					<p class="help-block">ID of the primary user</p>
-				</div>
-				<div class="form-group">
-					<input type="text" name="associatedMemberId" class="form-control" id="associatedMemberId" placeholder="Alias ID">
-					<p class="help-block">ID of the record that should become an alias for the primary user above</p>
-				</div>
-				<button type="submit" class="btn btn-default">Create Alias</button>
-			</form>
-		</div>		
 	</div>
 </div>
 
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-	<script src="/js/bootstrap.min.js"></script>
-	<script src="/js/f3.admin.managePax.js?v=<?= Util::getVersion() ?>"></script>
-	<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-	<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
+<script src="/js/jquery-3.7.1/jquery-3.7.1.min.js"></script>
+<script src="/js/bootstrap-5.3.3/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/2.1.3/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.1.3/js/dataTables.bootstrap5.js"></script>
+<script src="/js/f3.admin.managePax.js?v=<?= Util::getVersion() ?>"></script>
 </body>
 </html>
 

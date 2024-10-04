@@ -25,4 +25,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
 	$workoutService = new WorkoutService();
 	$workout = $workoutService->deleteWorkout($workoutId);
 }
-?>

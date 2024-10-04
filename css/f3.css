@@ -75,3 +75,7 @@ label {
 .cardbody-color {
     background-color: #ebf2fa;
 }
+
+.col-quarters {
+    width: 25%;
+}

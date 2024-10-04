@@ -46,6 +46,7 @@ use F3\Util\Util;
               Admin
             </a>
             <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/admin/aliasRequests.php">Alias Requests</a></li>
               <li><a class="dropdown-item" href="/admin/managePax.php">Manage Pax</a></li>
             </ul>
           </li>
@@ -58,7 +59,6 @@ use F3\Util\Util;
           <? } ?>
         </li>
       </ul>
-
     </div>
   </div>
 </nav>

@@ -292,4 +292,14 @@ class MemberRepository {
 
 		return $stmt->fetchAll();
 	}
+
+	public function updateAliasRequest($memberId, $associatedMemberId, AliasRequestStatus $status): void {
+		$stmt = $this->db->prepare('
+			update MEMBER_ALIAS_REQUEST
+				set STATUS=?
+				where PRIMARY_ID=? and ALIAS_ID=?
+		');
+
+		$stmt->execute([$status->value, $memberId, $associatedMemberId]);
+	}
 }

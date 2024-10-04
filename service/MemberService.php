@@ -125,8 +125,33 @@ class MemberService {
 			// re-assign existing aliases
 			$this->memberRepo->relinkMemberAlias($memberId, $associatedMemberId);
 			
+			// approve alias request if it exists
+			$this->memberRepo->updateAliasRequest($memberId, $associatedMemberId, AliasRequestStatus::APPROVED);
+			
 			// delete from member
 			$this->memberRepo->delete($associatedMemberId);
+
+			$db->commit();
+		}
+		catch (\Exception $e) {
+			$db->rollBack();
+			error_log($e);
+		}
+	}
+
+	/**
+	 * Rejects an alias request
+	 * @param mixed $memberId							the parent member id
+	 * @param mixed $associatedMemberId		the alias member id
+	 * @return void
+	 */
+	public function rejectAlias($memberId, $associatedMemberId) {
+		$db = Database::getInstance()->getDatabase();
+		try {
+			$db->beginTransaction();
+			
+			// reject the alias request
+			$this->memberRepo->updateAliasRequest($memberId, $associatedMemberId, AliasRequestStatus::REJECTED);
 			
 			$db->commit();
 		}
@@ -147,8 +172,6 @@ class MemberService {
 		// this will be used to track the request and allow for approval
 		// the request will be sent to the Nantan for approval
 		// the Nantan will have the ability to approve or deny the request
-		// if approved, the alias will be created
-		// if denied, the request will be removed
 
 		$return = Response::SUCCESS;
 		$db = Database::getInstance()->getDatabase();

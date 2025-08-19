@@ -4,6 +4,7 @@ namespace F3;
 if (!defined('__ROOT__')) {
 	define('__ROOT__', dirname(dirname(__FILE__)));
 }
+require_once(__ROOT__ . '/auth.php');
 require_once(__ROOT__ . '/model/AliasRequestStatus.php');
 require_once(__ROOT__ . '/service/MemberService.php');
 require_once(__ROOT__ . '/util/Util.php');

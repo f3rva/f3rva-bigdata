@@ -5,6 +5,7 @@ if (!defined('__ROOT__')) {
 	define('__ROOT__', dirname(dirname(dirname(__FILE__))));
 }
 require_once(__ROOT__ . '/model/AliasRequest.php');
+require_once(__ROOT__ . '/model/AliasRequestStatus.php');
 require_once(__ROOT__ . '/model/Member.php');
 require_once(__ROOT__ . '/model/MemberStats.php');
 require_once(__ROOT__ . '/model/Response.php');

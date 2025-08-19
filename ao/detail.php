@@ -193,7 +193,7 @@ use F3\Service\WorkoutService;
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script src="/js/jquery-3.7.1/jquery-3.7.1.min.js"></script>
-<script src="/js/bootstrap-5.3.3/bootstrap.min.js"></script>
+<script src="/js/bootstrap-5.3.3/bootstrap.bundle.min.js"></script>
 
 <script>
 	google.charts.load('current', {packages: ['corechart', 'line']});

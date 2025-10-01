@@ -120,7 +120,8 @@ class WorkoutService {
 				
 				// insert the workout
 				//error_log('adding workout: ' . $data->post->title . ' | ' . $additionalInfo->dateTime . '|' . $data->post->url);
-				$workoutId = $this->workoutRepo->save($data->post->title, $additionalInfo->date, $data->post->url);
+				$workoutId = $this->workoutRepo->save(title: $data->post->title, slug: null, 
+					dateArray: $additionalInfo->date, url: $data->post->url);
 				
 				// add the aos
 				$this->saveWorkoutAos($workoutId, $additionalInfo->tags);
@@ -162,8 +163,11 @@ class WorkoutService {
 				$db->beginTransaction();
 				
 				// insert the workout
-				$workoutId = $this->workoutRepo->save(title: $title, dateArray: $workoutDate, url: $url);
+				$workoutId = $this->workoutRepo->save(title: $title, slug: $slug, dateArray: $workoutDate, url: $url);
 				
+				// add the details
+				$this->saveWorkoutDetails(workoutId: $workoutId, body: $body);
+
 				// add the aos
 				$aoNames = array_column(array: $aos, column_key: 'name');
 				$this->saveWorkoutAos(workoutId: $workoutId, aos: $aoNames);
@@ -201,8 +205,12 @@ class WorkoutService {
 				$db->beginTransaction();
 				
 				// update the workout
-				$this->workoutRepo->update($workoutId, $workout->getTitle(), $additionalInfo->date, $workout->getBackblastUrl());
+				$this->workoutRepo->update(workoutId: $workoutId, title: $workout->getTitle(), 
+					slug: null, dateArray: $additionalInfo->date, url: $workout->getBackblastUrl());
 				
+				// delete the previous details
+				$this->workoutRepo->deleteWorkoutDetails(workoutId: $workoutId);
+
 				// delete previous aos
 				$this->workoutRepo->deleteWorkoutAos($workoutId);
 				
@@ -251,8 +259,14 @@ class WorkoutService {
 				$db->beginTransaction();
 				
 				// update the workout
-				$this->workoutRepo->update(workoutId: $workoutId, title: $title, dateArray: $workoutDate, url: $url);
+				$this->workoutRepo->update(workoutId: $workoutId, title: $title, slug: $slug, dateArray: $workoutDate, url: $url);
 				
+				// delete the previous details
+				$this->workoutRepo->deleteWorkoutDetails(workoutId: $workoutId);
+
+				// add the details
+				$this->saveWorkoutDetails(workoutId: $workoutId, body: $body);
+
 				// delete previous aos
 				$this->workoutRepo->deleteWorkoutAos(workoutId: $workoutId);
 				
@@ -303,22 +317,25 @@ class WorkoutService {
 		return $refreshed;
 	}
 	
-	public function deleteWorkout($workoutId) {
+	public function deleteWorkout($workoutId): mixed {
 		$db = Database::getInstance()->getDatabase();
 		try {
 			$db->beginTransaction();
 			
 			// delete previous aos
-			$this->workoutRepo->deleteWorkoutAos($workoutId);
+			$this->workoutRepo->deleteWorkoutAos(workoutId: $workoutId);
 			
 			// delete the previous qs
-			$this->workoutRepo->deleteWorkoutQs($workoutId);
+			$this->workoutRepo->deleteWorkoutQs(workoutId: $workoutId);
 			
 			// delete the previous members
-			$this->workoutRepo->deleteWorkoutMembers($workoutId);
+			$this->workoutRepo->deleteWorkoutMembers(workoutId: $workoutId);
 			
+			// delete the previous details
+			$this->workoutRepo->deleteWorkoutDetails(workoutId: $workoutId);
+
 			// delete the workout
-			$this->workoutRepo->deleteWorkout($workoutId);
+			$this->workoutRepo->deleteWorkout(workoutId: $workoutId);
 			
 			$db->commit();
 		}
@@ -410,28 +427,32 @@ class WorkoutService {
 		return $workout;
 	}
 	
-	private function saveWorkoutAos($workoutId, $aos) {
+	private function saveWorkoutDetails($workoutId, $body): void {
+		$this->workoutRepo->saveWorkoutDetails(workoutId: $workoutId, body: $body);
+	}
+
+	private function saveWorkoutAos($workoutId, $aos): void {
 		foreach ($aos as $ao) {
 			$ao = $this->workoutRepo->selectOrAddAo($ao);
 			$this->workoutRepo->saveWorkoutAo($workoutId, $ao->aoId);
 		}
 	}
 	
-	private function saveWorkoutMembers($workoutId, $pax) {
+	private function saveWorkoutMembers($workoutId, $pax): void {
 		foreach ($pax as $paxMember) {
 			$member = $this->memberService->getOrAddMember($paxMember);
 			$this->workoutRepo->saveWorkoutMember($workoutId, $member->getMemberId());
 		}
 	}
 	
-	private function saveWorkoutQs($workoutId, $qs) {
+	private function saveWorkoutQs($workoutId, $qs): void {
 		foreach ($qs as $q) {
 			$member = $this->memberService->getOrAddMember($q);
 			$this->workoutRepo->saveWorkoutQ($workoutId, $member->getMemberId());
 		}
 	}
 	
-	private function validateWorkout($dateArray) {
+	private function validateWorkout($dateArray): bool {
 		// check to see if this workout is in the future.  if it is then skip
 		$dateStr = $dateArray['year'] . '-' . $dateArray['month'] . '-' . $dateArray['day'];
 		if(strtotime(date('m/d/y', time())) < strtotime($dateStr)) {

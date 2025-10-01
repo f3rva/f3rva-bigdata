@@ -41,6 +41,14 @@ class WorkoutRepository {
 		$stmt->execute([$workoutId]);
 	}
 	
+	public function deleteWorkoutDetails($workoutId) {
+		$stmt = $this->db->prepare(query: '
+			delete from WORKOUT_DETAILS
+				where WORKOUT_ID=?
+		');
+		$stmt->execute(params: [$workoutId]);
+	}
+
 	public function deleteWorkout($workoutId) {
 			$stmt = $this->db->prepare('
 			delete from WORKOUT
@@ -341,18 +349,26 @@ class WorkoutRepository {
 		return $stmt->fetch()["MAX_DATE"];
 	}
 	
-	public function save($title, $dateArray, $url) {
-		$stmt = $this->db->prepare('
-			insert into WORKOUT(TITLE, WORKOUT_DATE, BACKBLAST_URL) values (?, ?, ?)
+	public function save($title, $slug, $dateArray, $url): bool|string {
+		$stmt = $this->db->prepare(query: '
+			insert into WORKOUT(TITLE, SLUG, WORKOUT_DATE, BACKBLAST_URL) values (?, ?, ?, ?)
 		');
 		
-		$dateStr = $this->getDateString($dateArray);
+		$dateStr = $this->getDateString(dateArray: $dateArray);
 
-		$stmt->execute([$title, $dateStr, $url]);
+		$stmt->execute(params: [$title, $slug, $dateStr, $url]);
 		
 		return $this->db->lastInsertId();
 	}
 	
+	public function saveWorkoutDetails($workoutId, $body): void {
+		$stmt = $this->db->prepare(query: '
+			insert into WORKOUT_DETAILS(WORKOUT_ID, HTML_CONTENT) values (?, ?)
+		');
+		
+		$stmt->execute(params: [$workoutId, $body]);
+	}
+
 	public function saveWorkoutMember($workoutId, $memberId) {
 		if (!$this->findWorkoutMember($workoutId, $memberId)) {
 			$stmt = $this->db->prepare('
@@ -405,15 +421,15 @@ class WorkoutRepository {
 		return $ao;
 	}
 	
-	public function update($workoutId, $title, $dateArray, $url) {
-		$stmt = $this->db->prepare('
-			update WORKOUT set TITLE=?, WORKOUT_DATE=?, BACKBLAST_URL=?
+	public function update($workoutId, $title, $slug, $dateArray, $url): void {
+		$stmt = $this->db->prepare(query: '
+			update WORKOUT set TITLE=?, SLUG=?, WORKOUT_DATE=?, BACKBLAST_URL=?
 				where WORKOUT_ID=?
 		');
 		
-		$dateStr = $this->getDateString($dateArray);
+		$dateStr = $this->getDateString(dateArray: $dateArray);
 		
-		$stmt->execute([$title, $dateStr, $url, $workoutId]);
+		$stmt->execute(params: [$title, $slug, $dateStr, $url, $workoutId]);
 	}
 	
 	private function getDateString($dateArray) {

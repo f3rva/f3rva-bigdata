@@ -1,7 +1,7 @@
 <?php
 namespace F3\Model;
 
-class Member {
+class Member implements \JsonSerializable {
 	private $memberId;
 	private $f3Name;
 	private $aliases;
@@ -28,5 +28,13 @@ class Member {
 	
 	public function setAliases($aliases) {
 		$this->aliases = $aliases;
+	}
+
+	public function jsonSerialize(): mixed
+	{
+		return [
+			'memberId' => $this->memberId,
+			'f3Name' => $this->f3Name
+		];
 	}
 }

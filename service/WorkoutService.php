@@ -5,6 +5,7 @@ if (!defined('__ROOT__')) {
 	define('__ROOT__', dirname(dirname(dirname(__FILE__))));
 }
 require_once(__ROOT__ . '/dao/ScraperDao.php');
+require_once(__ROOT__ . '/model/AO.php');
 require_once(__ROOT__ . '/model/Member.php');
 require_once(__ROOT__ . '/model/Workout.php');
 require_once(__ROOT__ . '/repo/Database.php');
@@ -13,6 +14,7 @@ require_once(__ROOT__ . '/service/MemberService.php');
 require_once(__ROOT__ . '/util/DateUtil.php');
 
 use F3\Dao\ScraperDao;
+use F3\Model\AO;
 use F3\Model\Member;
 use F3\Model\Workout;
 use F3\Repo\Database;
@@ -72,31 +74,36 @@ class WorkoutService {
 		return $this->processWorkoutResults($workouts);
 	}
 	
-	public function getWorkout($workoutId) {
-		$details = $this->workoutRepo->find($workoutId);
+	public function getWorkout($workoutId): mixed {
+		$details = $this->workoutRepo->find(id: $workoutId);
 		$workoutObj = null;
 		
 		foreach ($details as $workout) {
 			$workoutId = $workout['WORKOUT_ID'];
-			if (is_null($workoutObj)) {
-				$workoutObj = $this->createWorkoutObj($workout);
+			if (is_null(value: $workoutObj)) {
+				$workoutObj = $this->createWorkoutObj(workout: $workout);
 				
 				// retrieve pax
-				$paxList = $this->workoutRepo->findPax($workoutId);
+				$paxList = $this->workoutRepo->findPax(id: $workoutId);
 				$paxArray = array();
 				foreach ($paxList as $pax) {
 					$member = new Member();
-					$member->setMemberId($pax["MEMBER_ID"]);
-					$member->setF3Name($pax["F3_NAME"]);
-					$paxArray[$member->getMemberId()] = $member;
+					$member->setMemberId(memberId: $pax["MEMBER_ID"]);
+					$member->setF3Name(f3Name: $pax["F3_NAME"]);
+					$paxArray[] = $member;
 				}
-				$workoutObj->setPax($paxArray);
+				$workoutObj->setPax(pax: $paxArray);
 			}
 			else {
 				// we already have the workout details, just add the duplicate info
-				$workoutObj = $this->addAoToWorkout($workoutObj, $workout['AO_ID'], $workout['AO']);
-				$workoutObj = $this->addQToWorkout($workoutObj, $workout['Q_ID'], $workout['Q']);
+				$workoutObj = $this->addAoToWorkout(workout: $workoutObj, aoId: $workout['AO_ID'], aoDescription: $workout['AO']);
+				$workoutObj = $this->addQToWorkout(workout: $workoutObj, qId: $workout['Q_ID'], qName: $workout['Q']);
 			}
+		}
+
+		if (!is_null(value: $workoutObj)) {
+			$workoutObj->setAo(array_values(array: $workoutObj->getAo()));
+			$workoutObj->setQ(array_values(array: $workoutObj->getQ()));	
 		}
 				
 		return $workoutObj;
@@ -374,33 +381,46 @@ class WorkoutService {
 		
 		return $workoutsArray;
 	}
-	private function createWorkoutObj($workout) {
+	private function createWorkoutObj($workout): Workout {
 		$workoutObj = new Workout();
 		                
-		error_log('createWorkoutObj workout: ' . json_encode($workout));
+		error_log(message: 'createWorkoutObj workout: ' . json_encode($workout));
 
 		$aoArray = array();
 		// only add the AO if it exists
-		if (!is_null($workout['AO_ID'])) {
-			$aoArray[$workout['AO_ID']] = $workout['AO'];
+		if (!is_null(value: $workout['AO_ID'])) {
+			$ao = new AO();
+			$ao->setId(id: $workout['AO_ID']);
+			$ao->setDescription(description: $workout['AO']);
+			$aoArray[$workout['AO_ID']] = $ao;
 		}
-		$workoutObj->setAo($aoArray);
+		$workoutObj->setAo(ao: $aoArray);
 		
 		$qArray = array();
 		// only add the Q if it exists
 		if (!is_null($workout['Q_ID'])) {
-			$qArray[$workout['Q_ID']] = $workout['Q'];
+			$q = new Member();
+			$q->setMemberId(memberId: $workout['Q_ID']);
+			$q->setF3Name(f3Name: $workout['Q']);
+			$qArray[$workout['Q_ID']] = $q;
 		}
-		$workoutObj->setQ($qArray);
+		$workoutObj->setQ(q: $qArray);
 		
-		$workoutObj->setBackblastUrl($workout['BACKBLAST_URL']);
-		$workoutObj->setTitle($workout['TITLE']);
-		$workoutObj->setWorkoutId($workout['WORKOUT_ID']);
-		$workoutObj->setWorkoutDate($workout['WORKOUT_DATE']);
+		$workoutObj->setBackblastUrl(backblastUrl: $workout['BACKBLAST_URL']);
+		$workoutObj->setTitle(title: $workout['TITLE']);
+		$workoutObj->setSlug(slug: $workout['SLUG']);
+		$workoutObj->setWorkoutId(workoutId: $workout['WORKOUT_ID']);
+		$workoutObj->setWorkoutDate(workoutDate: $workout['WORKOUT_DATE']);
+		if (array_key_exists(key: 'HTML_CONTENT', array: $workout)) {
+			$workoutObj->setContent(content: $workout['HTML_CONTENT']);
+		}
+		else {
+			$workoutObj->setContent(content: '');
+		}
 
 		// only set if PAX_COUNT is there
-		if (array_key_exists('PAX_COUNT', $workout)) {
-			$workoutObj->setPaxCount($workout['PAX_COUNT']);
+		if (array_key_exists(key: 'PAX_COUNT', array: $workout)) {
+			$workoutObj->setPaxCount(paxCount: $workout['PAX_COUNT']);
 		}
 		
 		return $workoutObj;
@@ -410,7 +430,10 @@ class WorkoutService {
 		$aoArray = $workout->getAo();
 		
 		if (!array_key_exists($aoId, $aoArray)) {
-			$aoArray[$aoId] = $aoDescription;
+			$ao = new AO();
+			$ao->setId(id: $aoId);
+			$ao->setDescription(description: $aoDescription);
+			$aoArray[$aoId] = $ao;
 			$workout->setAo($aoArray);
 		}
 		
@@ -420,7 +443,10 @@ class WorkoutService {
 	private function addQToWorkout($workout, $qId, $qName) {
 		$qArray = $workout->getQ();
 		if (!array_key_exists($qId, $qArray)) {
-			$qArray[$qId] = $qName;
+			$q = new Member();
+			$q->setMemberId(memberId: $qId);
+			$q->setF3Name(f3Name: $qName);
+			$qArray[$qId] = $q;
 			$workout->setQ($qArray);
 		}
 		

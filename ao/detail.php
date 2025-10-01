@@ -173,11 +173,11 @@ use F3\Service\WorkoutService;
 					<td><?= $workout->getWorkoutDate() ?></td>
 					<td><a href="<?= $workout->getBackblastUrl() ?>" target="_blank"><?= $workout->getTitle() ?></a></td>
 					<td>
-			        	<ul class="list-unstyled">
-			        	<? foreach ($workout->getQ() as $qId => $q) { ?>
-							<li><a href="/member/detail.php?id=<?= $qId ?>"><?= $q ?></a></li>
+						<ul class="list-unstyled">
+			        	<? foreach ($workout->getQ() as $q) { ?>
+							<li><a href="/member/detail.php?id=<?= $q->getMemberId() ?>"><?= $q->getF3Name() ?></a></li>
 			        	<? } ?>
-			        	</ul>
+						</ul>
 					</td>
 					<td><a href="/workout/detail.php?id=<?= $workout->getWorkoutId() ?>"><?= $workout->getPaxCount() ?></a></td>
 				</tr>

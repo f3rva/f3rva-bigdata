@@ -29,7 +29,7 @@ use F3\Service\WorkoutService;
 	<span>Q:</span>
  	<ul class="list-inline">
 	<? foreach ($detail->getQ() as $q) { ?>
-		<li><?= $q ?></li>
+		<li><?= $q->getF3Name() ?></li>
 	<? } ?>
 	</ul>
 </div>
@@ -37,7 +37,7 @@ use F3\Service\WorkoutService;
 	<span>AO:</span>
 	<ul class="list-inline">
 	<? foreach ($detail->getAo() as $ao) { ?>
-		<li><?= $ao ?></li>
+		<li><?= $ao->getDescription() ?></li>
 	<? } ?>
 	</ul>
 </div>

@@ -24,4 +24,27 @@ class Util {
         }
         return isset($_SESSION[Util::SESSION_TOKEN]) && $_SESSION[Util::SESSION_TOKEN] == true;
     }
+
+    public static function retrieveAccessControlAllowOriginHeader(): mixed {
+        if (!isset($_SERVER['HTTP_ORIGIN'])) {
+            return '';
+        }
+        
+        $originHeader = $_SERVER['HTTP_ORIGIN'];
+        error_log(message: "Origin header: " . $originHeader);
+
+        $allowedOrigins = array([
+            'http://localhost:3000',
+            'https://dev.f3rva.org',
+            'https://www.dev.f3rva.org',
+            'https://f3rva.org'
+        ]);
+
+        $accessControlAllowOrigin = in_array(
+            needle: $originHeader, 
+            haystack: $allowedOrigins) 
+            ? $originHeader : '';
+        
+        return $originHeader;
+    }
 }

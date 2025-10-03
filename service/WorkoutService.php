@@ -109,6 +109,42 @@ class WorkoutService {
 		return $workoutObj;
 	}
 
+	public function getWorkoutByDateAndSlug($year, $month, $day, $slug): mixed {
+		$date = sprintf('%04d-%02d-%02d',  $year, $month, $day);
+		$details = $this->workoutRepo->findByDateAndSlug(date: $date, slug: $slug);
+		$workoutObj = null;
+		
+		foreach ($details as $workout) {
+			$workoutId = $workout['WORKOUT_ID'];
+			if (is_null(value: $workoutObj)) {
+				$workoutObj = $this->createWorkoutObj(workout: $workout);
+				
+				// retrieve pax
+				$paxList = $this->workoutRepo->findPax(id: $workoutId);
+				$paxArray = array();
+				foreach ($paxList as $pax) {
+					$member = new Member();
+					$member->setMemberId(memberId: $pax["MEMBER_ID"]);
+					$member->setF3Name(f3Name: $pax["F3_NAME"]);
+					$paxArray[] = $member;
+				}
+				$workoutObj->setPax(pax: $paxArray);
+			}
+			else {
+				// we already have the workout details, just add the duplicate info
+				$workoutObj = $this->addAoToWorkout(workout: $workoutObj, aoId: $workout['AO_ID'], aoDescription: $workout['AO']);
+				$workoutObj = $this->addQToWorkout(workout: $workoutObj, qId: $workout['Q_ID'], qName: $workout['Q']);
+			}
+		}
+
+		if (!is_null(value: $workoutObj)) {
+			$workoutObj->setAo(array_values(array: $workoutObj->getAo()));
+			$workoutObj->setQ(array_values(array: $workoutObj->getQ()));	
+		}
+				
+		return $workoutObj;
+	}
+
 	public function addWorkout($data) {
 		$additionalInfo = $data->additionalInfo ?? null;
 		// parse the post to get the information we need

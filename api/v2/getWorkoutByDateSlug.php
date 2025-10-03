@@ -28,15 +28,21 @@ function exit_error($status, $code, $message): never {
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 	init_response();
 	
-	$workoutId = $_REQUEST['id'];
+	$year = $_REQUEST['year'];
+	$month = $_REQUEST['month'];
+	$day = $_REQUEST['day'];
+	$slug = $_REQUEST['slug'];
 	
-	// if workout id is null or empty, return with error
-	if (is_null(value: $workoutId) || $workoutId === '') {
-		exit_error(status: 400, code: 1000, message: 'Invalid workout id');
+	// if any of these are null or empty, return with error
+	if (is_null(value: $year) || $year === '' || 
+			is_null(value: $month) || $month === '' || 
+			is_null(value: $day) || $day === '' || 
+			is_null(value: $slug) || $slug === '') {
+		exit_error(status: 400, code: 1000, message: 'Invalid date or slug');
 	}
-
+	
 	$workoutService = new WorkoutService();
-	$workout = $workoutService->getWorkout(workoutId: $workoutId);
+	$workout = $workoutService->getWorkoutByDateAndSlug(year: $year, month: $month, day: $day, slug: $slug);
 
 	if (is_null(value: $workout)) {
 		exit_error(status: 404, code: 1001, message: 'Workout not found');

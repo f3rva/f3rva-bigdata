@@ -73,6 +73,23 @@ class WorkoutRepository {
 		return $result;
 	}
 
+	public function findByDateAndSlug($date, $slug): mixed {
+		$stmt = $this->db->prepare(query: '
+			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.SLUG, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q, wd.HTML_CONTENT from WORKOUT w
+				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
+				left outer join AO ao on wao.AO_ID = ao.AO_ID
+				left outer join WORKOUT_Q wq on w.WORKOUT_ID = wq.WORKOUT_ID
+				left outer join MEMBER mq on wq.MEMBER_ID = mq.MEMBER_ID
+				left outer join WORKOUT_DETAILS wd on w.WORKOUT_ID = wd.WORKOUT_ID
+				where w.WORKOUT_DATE=?
+				and w.SLUG=?
+		');
+		$stmt->execute(params: [$date, $slug]);
+		
+		$result = $stmt->fetchAll();
+		return $result;
+	}
+
 	public function findAllByDateRange($startDate, $endDate) {
 		$stmt = $this->db->prepare('
 			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.SLUG, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w

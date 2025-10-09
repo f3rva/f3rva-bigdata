@@ -90,7 +90,7 @@ class WorkoutRepository {
 		return $result;
 	}
 
-	public function findAllByDateRange($startDate, $endDate) {
+	public function findAllByDateRange($startDate, $endDate, $limit = 20, $offset = 0) {
 		$stmt = $this->db->prepare('
 			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.SLUG, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
 				left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
@@ -102,9 +102,10 @@ class WorkoutRepository {
 				where w.WORKOUT_DATE between ? and ?
 				group by w.WORKOUT_ID, ao.AO_ID, mq.MEMBER_ID, ao.DESCRIPTION
 				order by w.WORKOUT_DATE desc, ao.DESCRIPTION asc
+				limit ? offset ?
 		');
-		$stmt->execute([$startDate, $endDate]);
-		
+		$stmt->execute([$startDate, $endDate, $limit, $offset]);
+
 		return $stmt->fetchAll();
 	}
 

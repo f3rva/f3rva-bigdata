@@ -29,7 +29,19 @@ class DateUtil {
 		
 		return $dateStr;
 	}
-	
+
+	public static function getStartDateOfYear($year) {
+		self::defaultTimezone();
+		$date = \DateTime::createFromFormat(format: 'Y-m-d', datetime: $year . '-01-01');
+		return $date->format(format: 'Y-m-d');
+	}
+
+	public static function getEndDateOfYear($year) {
+		self::defaultTimezone();
+		$date = \DateTime::createFromFormat(format: 'Y-m-d', datetime: $year . '-12-31');
+		return $date->format('Y-m-d');
+	}
+
 	public static function subtractInterval($date, $dateInterval) {
 		self::defaultTimezone();
 		

@@ -29,25 +29,25 @@ function getWorkoutRow(k, v) {
 	// start of row
 	var row = '<tr>';
 	// column 1
-	row += '<td>' + v.workout.workoutDate + '</td>';
+	row += '<td>' + v.workoutDate + '</td>';
 	// column 2
-	row += '<td><a href="' + v.workout.backblastUrl + '" target="_blank">' + v.workout.title + '</a></td>';
+	row += '<td><a href="' + v.backblastUrl + '" target="_blank">' + v.title + '</a></td>';
 	// column 3
 	var aoRow = '<td><ul class="list-unstyled">';
-	$.each(v.workout.ao, function (k, v) {
-		aoRow += '<li><a href="/ao/detail.php?id=' + k + '">' + v + '</a></li>';
+	$.each(v.ao, function (k, v) {
+		aoRow += '<li><a href="/ao/detail.php?id=' + v.id + '">' + v.description + '</a></li>';
 	});
 	aoRow += '</ul></td>';
 	row += aoRow;
 	// column 4
 	var qRow = '<td><ul class="list-unstyled">';
-	$.each(v.workout.q, function (k, v) {
-		qRow += '<li><a href="/member/detail.php?id=' + k + '">' + v + '</a></li>';
+	$.each(v.q, function (k, v) {
+		qRow += '<li><a href="/member/detail.php?id=' + v.memberId + '">' + v.f3Name + '</a></li>';
 	});
 	qRow += '</ul></td>';
 	row += qRow;
 	// column 5
-	row += '<td><a href="/workout/detail.php?id=' + v.workout.workoutId + '">' + v.workout.paxCount + '</a></td>';
+	row += '<td><a href="/workout/detail.php?id=' + v.workoutId + '">' + v.paxCount + '</a></td>';
 	// end of row
 	row += '</tr>';
 

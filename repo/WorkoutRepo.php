@@ -58,15 +58,8 @@ class WorkoutRepository {
 	}
 			
 	public function find($id) {
-		$stmt = $this->db->prepare('
-			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.SLUG, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q, wd.HTML_CONTENT from WORKOUT w
-				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
-				left outer join AO ao on wao.AO_ID = ao.AO_ID
-				left outer join WORKOUT_Q wq on w.WORKOUT_ID = wq.WORKOUT_ID
-				left outer join MEMBER mq on wq.MEMBER_ID = mq.MEMBER_ID
-				left outer join WORKOUT_DETAILS wd on w.WORKOUT_ID = wd.WORKOUT_ID
-				where w.WORKOUT_ID=?
-		');
+		$query = $this->replaceFindBySingularPlaceholders(whereClauses: "w.WORKOUT_ID=?");
+		$stmt = $this->db->prepare($query);
 		$stmt->execute([$id]);
 		
 		$result = $stmt->fetchAll();
@@ -74,92 +67,262 @@ class WorkoutRepository {
 	}
 
 	public function findByDateAndSlug($date, $slug): mixed {
-		$stmt = $this->db->prepare(query: '
-			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.SLUG, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q, wd.HTML_CONTENT from WORKOUT w
-				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
-				left outer join AO ao on wao.AO_ID = ao.AO_ID
-				left outer join WORKOUT_Q wq on w.WORKOUT_ID = wq.WORKOUT_ID
-				left outer join MEMBER mq on wq.MEMBER_ID = mq.MEMBER_ID
-				left outer join WORKOUT_DETAILS wd on w.WORKOUT_ID = wd.WORKOUT_ID
-				where w.WORKOUT_DATE=?
-				and w.SLUG=?
-		');
+		$query = $this->replaceFindBySingularPlaceholders(whereClauses: "w.WORKOUT_DATE=? and w.SLUG=?");
+		$stmt = $this->db->prepare($query);
+
 		$stmt->execute(params: [$date, $slug]);
 		
 		$result = $stmt->fetchAll();
 		return $result;
 	}
 
+	private function replaceFindBySingularPlaceholders($whereClauses): string {
+		$query = '
+			select
+					w.WORKOUT_ID,
+					w.WORKOUT_DATE,
+					w.TITLE,
+					w.SLUG,
+					w.BACKBLAST_URL,
+					ao_agg.AO_IDS,
+					ao_agg.AO_DESCRIPTIONS AS AO,
+					q_agg.Q_IDS,
+					q_agg.Q_NAMES AS Q,
+					wd.HTML_CONTENT -- HTML_CONTENT is outside the aggregation as it is 1:1
+			from
+					WORKOUT w
+			-- Subquery 1: Aggregate Qs
+			left outer join
+					(
+							select
+									wq.WORKOUT_ID,
+									GROUP_CONCAT(mq.MEMBER_ID SEPARATOR \', \') AS Q_IDS,
+									GROUP_CONCAT(mq.F3_NAME SEPARATOR \', \') AS Q_NAMES
+							from
+									WORKOUT_Q wq
+							inner join
+									MEMBER mq ON wq.MEMBER_ID = mq.MEMBER_ID
+							group by
+									wq.WORKOUT_ID
+					) q_agg ON w.WORKOUT_ID = q_agg.WORKOUT_ID
+			-- Subquery 2: Aggregate AOs
+			left outer join
+					(
+							select
+									wao.WORKOUT_ID,
+									GROUP_CONCAT(ao.AO_ID SEPARATOR \', \') AS AO_IDS,
+									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS
+							from
+									WORKOUT_AO wao
+							inner join
+									AO ao ON wao.AO_ID = ao.AO_ID
+							group by
+									wao.WORKOUT_ID
+					) ao_agg ON w.WORKOUT_ID = ao_agg.WORKOUT_ID
+			-- Join to WORKOUT_DETAILS (should be 1:1 or 1:0, so it will not cause duplicates)
+			left outer join
+					WORKOUT_DETAILS wd ON w.WORKOUT_ID = wd.WORKOUT_ID
+			where
+					::{WHERE_CLAUSE}::
+			-- Grouping ensures a single record for the workout, even if details were 1:many
+			group by
+					w.WORKOUT_ID,
+					w.WORKOUT_DATE,
+					w.TITLE,
+					w.SLUG,
+					w.BACKBLAST_URL,
+					ao_agg.AO_IDS,
+					ao_agg.AO_DESCRIPTIONS,
+					q_agg.Q_IDS,
+					q_agg.Q_NAMES,
+					wd.HTML_CONTENT; -- Include the 1:1/1:0 column in the GROUP BY
+		';
+
+		return str_replace('::{WHERE_CLAUSE}::', $whereClauses, $query);
+	}
+
 	public function findAllByDateRange($startDate, $endDate, $limit = 20, $offset = 0) {
 		$stmt = $this->db->prepare('
-			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.SLUG, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
-				left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
-				left outer join WORKOUT_Q wq on w.WORKOUT_ID = wq.WORKOUT_ID
-				left outer join MEMBER mq on wq.MEMBER_ID = mq.MEMBER_ID
-				left outer join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
-				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
-				left outer join AO ao on wao.AO_ID = ao.AO_ID
-				where w.WORKOUT_DATE between ? and ?
-				group by w.WORKOUT_ID, ao.AO_ID, mq.MEMBER_ID, ao.DESCRIPTION
-				order by w.WORKOUT_DATE desc, ao.DESCRIPTION asc
-				limit ? offset ?
+			select
+					w.WORKOUT_ID,
+					w.WORKOUT_DATE,
+					w.TITLE,
+					w.SLUG,
+					w.BACKBLAST_URL,
+					ao_agg.AO_IDS,
+					ao_agg.AO_DESCRIPTIONS AS AO,
+					q_agg.Q_IDS,
+					q_agg.Q_NAMES AS Q,
+					COUNT(mp.F3_NAME) AS PAX_COUNT
+			from
+					WORKOUT w
+			-- Subquery 1: Aggregate Qs
+			left outer join
+					(
+							select
+									wq.WORKOUT_ID,
+									GROUP_CONCAT(mq.MEMBER_ID SEPARATOR \', \') AS Q_IDS,
+									GROUP_CONCAT(mq.F3_NAME SEPARATOR \', \') AS Q_NAMES
+							from
+									WORKOUT_Q wq
+							inner join
+									MEMBER mq ON wq.MEMBER_ID = mq.MEMBER_ID
+							group by
+									wq.WORKOUT_ID
+					) q_agg ON w.WORKOUT_ID = q_agg.WORKOUT_ID
+			-- Subquery 2: Aggregate AOs
+			left outer join
+					(
+							select
+									wao.WORKOUT_ID,
+									GROUP_CONCAT(ao.AO_ID SEPARATOR \', \') AS AO_IDS,
+									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS
+							from
+									WORKOUT_AO wao
+							inner join
+									AO ao ON wao.AO_ID = ao.AO_ID
+							group by
+									wao.WORKOUT_ID
+					) ao_agg ON w.WORKOUT_ID = ao_agg.WORKOUT_ID
+			-- Join for PAX count
+			left outer join
+					WORKOUT_PAX wp ON w.WORKOUT_ID = wp.WORKOUT_ID
+			left outer join
+					MEMBER mp ON wp.MEMBER_ID = mp.MEMBER_ID
+
+			WHERE
+					w.WORKOUT_DATE between ? and ?
+			GROUP BY
+					w.WORKOUT_ID,
+					w.WORKOUT_DATE,
+					w.TITLE,
+					w.SLUG,
+					w.BACKBLAST_URL,
+					ao_agg.AO_IDS,
+					ao_agg.AO_DESCRIPTIONS,
+					q_agg.Q_IDS,
+					q_agg.Q_NAMES
+			ORDER BY
+					w.WORKOUT_DATE DESC,
+					ao_agg.AO_DESCRIPTIONS ASC
+			LIMIT ? OFFSET ?;
 		');
 		$stmt->execute([$startDate, $endDate, $limit, $offset]);
 
 		return $stmt->fetchAll();
 	}
 
-	public function findAllByAo($aoId) {
-		$stmt = $this->db->prepare('
-			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.SLUG, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
-				left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
-				left outer join WORKOUT_Q wq on w.WORKOUT_ID = wq.WORKOUT_ID
-				left outer join MEMBER mq on wq.MEMBER_ID = mq.MEMBER_ID
-				left outer join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
-				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
-				left outer join AO ao on wao.AO_ID = ao.AO_ID
-				where ao.AO_ID = ?
-				group by w.WORKOUT_ID, ao.AO_ID, mq.MEMBER_ID, ao.DESCRIPTION
-				order by w.WORKOUT_DATE desc, ao.DESCRIPTION asc
-		');
+	private function replaceFindByPluralPlaceholders($joins, $whereClauses): string {
+		$query = '
+			select
+					w.WORKOUT_ID,
+					w.WORKOUT_DATE,
+					w.TITLE,
+					w.SLUG,
+					w.BACKBLAST_URL,
+					ao_agg.AO_IDS,
+					ao_agg.AO_DESCRIPTIONS AS AO,
+					q_agg.Q_IDS,
+					q_agg.Q_NAMES AS Q,
+					pax_count_agg.PAX_COUNT
+			from
+					WORKOUT w
+			-- 1. Filter Workouts by the specified PAX (This join is REQUIRED)
+			inner join
+					::{JOINS}::
+			-- 2. Aggregate Qs
+			left outer join
+					(
+							select
+									wq.WORKOUT_ID,
+									GROUP_CONCAT(mq.MEMBER_ID SEPARATOR \', \') AS Q_IDS,
+									GROUP_CONCAT(mq.F3_NAME SEPARATOR \', \') AS Q_NAMES
+							from
+									WORKOUT_Q wq
+							inner join
+									MEMBER mq ON wq.MEMBER_ID = mq.MEMBER_ID
+							group by
+									wq.WORKOUT_ID
+					) q_agg ON w.WORKOUT_ID = q_agg.WORKOUT_ID
+			-- 3. Aggregate AOs
+			left outer join
+					(
+							select
+									wao.WORKOUT_ID,
+									GROUP_CONCAT(ao.AO_ID SEPARATOR \', \') AS AO_IDS,
+									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS
+							from
+									WORKOUT_AO wao
+							inner join
+									AO ao ON wao.AO_ID = ao.AO_ID
+							group by
+									wao.WORKOUT_ID
+					) ao_agg ON w.WORKOUT_ID = ao_agg.WORKOUT_ID
+			-- 4. Get the Total PAX Count for the Workout
+			left outer join
+					(
+							select
+									WORKOUT_ID,
+									COUNT(MEMBER_ID) AS PAX_COUNT
+							from
+									WORKOUT_PAX
+							group by
+									WORKOUT_ID
+					) pax_count_agg ON w.WORKOUT_ID = pax_count_agg.WORKOUT_ID
+			where
+					::{WHERE_CLAUSE}::
+			group by
+					w.WORKOUT_ID,
+					w.WORKOUT_DATE,
+					w.TITLE,
+					w.SLUG,
+					w.BACKBLAST_URL,
+					ao_agg.AO_IDS,
+					ao_agg.AO_DESCRIPTIONS,
+					q_agg.Q_IDS,
+					q_agg.Q_NAMES,
+					pax_count_agg.PAX_COUNT
+			order by 
+					w.WORKOUT_DATE DESC,
+					ao_agg.AO_DESCRIPTIONS ASC;
+		';
+
+		$query = str_replace('::{JOINS}::', $joins, $query);
+		$query = str_replace('::{WHERE_CLAUSE}::', $whereClauses, $query);
+
+		return $query;
+	}	
+	
+	public function findAllByAO($aoId): array {
+		$query = $this->replaceFindByPluralPlaceholders(
+			joins: 'WORKOUT_AO wao_filter ON w.WORKOUT_ID = wao_filter.WORKOUT_ID', 
+			whereClauses: 'wao_filter.AO_ID = ?');
+			
+		$stmt = $this->db->prepare($query);
 		$stmt->execute([$aoId]);
-		
+
 		return $stmt->fetchAll();
 	}
-	
+
 	public function findAllByQ($qId) {
-		$stmt = $this->db->prepare('
-			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.SLUG, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
-				left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
-				left outer join WORKOUT_Q wq on w.WORKOUT_ID = wq.WORKOUT_ID
-				left outer join MEMBER mq on wq.MEMBER_ID = mq.MEMBER_ID
-				left outer join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
-				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
-				left outer join AO ao on wao.AO_ID = ao.AO_ID
-				where wq.MEMBER_ID = ?
-				group by w.WORKOUT_ID, ao.AO_ID, mq.MEMBER_ID, ao.DESCRIPTION
-				order by w.WORKOUT_DATE desc, ao.DESCRIPTION asc
-		');
+		$query = $this->replaceFindByPluralPlaceholders(
+			joins: 'WORKOUT_Q wq_filter ON w.WORKOUT_ID = wq_filter.WORKOUT_ID', 
+			whereClauses: 'wq_filter.MEMBER_ID = ?');
+			
+		$stmt = $this->db->prepare($query);
 		$stmt->execute([$qId]);
-		
+
 		return $stmt->fetchAll();
 	}
 	
 	public function findAllByPax($paxId) {
-		$stmt = $this->db->prepare('
-			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.SLUG, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, mq.MEMBER_ID as Q_ID, mq.F3_NAME as Q, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
-				left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
-				left outer join WORKOUT_Q wq on w.WORKOUT_ID = wq.WORKOUT_ID
-				left outer join MEMBER mq on wq.MEMBER_ID = mq.MEMBER_ID
-				left outer join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
-				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
-				left outer join AO ao on wao.AO_ID = ao.AO_ID
-				where wp.MEMBER_ID = ?
-				group by w.WORKOUT_ID, ao.AO_ID, mq.MEMBER_ID, ao.DESCRIPTION
-				order by w.WORKOUT_DATE desc, ao.DESCRIPTION asc
-		');
+		$query = $this->replaceFindByPluralPlaceholders(
+			joins: 'WORKOUT_PAX wp_filter ON w.WORKOUT_ID = wp_filter.WORKOUT_ID', 
+			whereClauses: 'wp_filter.MEMBER_ID = ?');
+			
+		$stmt = $this->db->prepare($query);
 		$stmt->execute([$paxId]);
-		
+
 		return $stmt->fetchAll();
 	}
 	

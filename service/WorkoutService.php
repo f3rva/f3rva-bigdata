@@ -28,6 +28,9 @@ use F3\Util\DateUtil;
  * @author bbischoff
  */
 class WorkoutService {
+	private const DEFAULT_PAGE = 1;
+	private const DEFAULT_PAGE_SIZE = 20;
+
 	private $memberService;
 	private $scraperDao;
 	private $workoutRepo;
@@ -51,7 +54,40 @@ class WorkoutService {
 		
 		$startDate = DateUtil::subtractInterval($endDate, 'P' . $numberOfDaysBack . 'D');
 		
-		$workouts = $this->workoutRepo->findAllByDateRange($startDate, $endDate);
+		$workouts = $this->workoutRepo->findAllByDateRange($startDate, $endDate, 200, 0);
+		
+		return $this->processWorkoutResults($workouts);
+	}
+
+	public function getWorkoutsByYear($year, $page = self::DEFAULT_PAGE, $pageSize = self::DEFAULT_PAGE_SIZE): array {
+		// use the year to call findAllByDateRange to get all the workouts for that year
+		$startDate = DateUtil::getStartDateOfYear(year: $year);
+		$endDate = DateUtil::getEndDateOfYear(year: $year);
+		$offset = $this->getOffset(page: $page, pageSize: $pageSize);
+
+		$workouts = $this->workoutRepo->findAllByDateRange(startDate: $startDate, endDate: $endDate, limit: $pageSize, offset: $offset);
+		
+		return $this->processWorkoutResults(workouts: $workouts);
+	}
+
+	public function getWorkoutsByMonth($year, $month, $page = self::DEFAULT_PAGE, $pageSize = self::DEFAULT_PAGE_SIZE): array {
+		// use the year and month to call findAllByDateRange to get all the workouts for that month
+		$startDate = sprintf('%04d-%02d-01',  $year, $month);
+		$endDate = sprintf('%04d-%02d-%02d',  $year, $month, cal_days_in_month(CAL_GREGORIAN, $month, $year));
+		$offset = $this->getOffset(page: $page, pageSize: $pageSize);
+
+		$workouts = $this->workoutRepo->findAllByDateRange(startDate: $startDate, endDate: $endDate, limit: $pageSize, offset: $offset);
+		
+		return $this->processWorkoutResults(workouts: $workouts);
+	}
+	
+	public function getWorkoutsByDay($year, $month, $day, $page = self::DEFAULT_PAGE, $pageSize = self::DEFAULT_PAGE_SIZE) {
+		// use the year, month, and day to call findAllByDateRange to get all the workouts for that day
+		$startDate = sprintf('%04d-%02d-%02d',  $year, $month, $day);
+		$endDate = $startDate;
+		$offset = $this->getOffset(page: $page, pageSize: $pageSize);
+
+		$workouts = $this->workoutRepo->findAllByDateRange(startDate: $startDate, endDate: $endDate, limit: $pageSize, offset: $offset);
 		
 		return $this->processWorkoutResults($workouts);
 	}
@@ -395,50 +431,57 @@ class WorkoutService {
 		$workoutsArray = array();
 		
 		foreach ($workouts as $workout) {
-			$workoutId = $workout['WORKOUT_ID'];
-			
-			// if the key doesn't exist, we need to create the objects
-			if (!array_key_exists($workoutId, $workoutsArray)) {
-				$workoutObj = $this->createWorkoutObj($workout);
-				$workoutsArray[$workoutObj->getWorkoutId()] = $workoutObj;
-			}
-			else {
-				// we already have the workout details, just add the duplicate info
-				if (!is_null($workout['AO_ID'])) {
-					$existingWorkout = $workoutsArray[$workoutId];
-					$existingWorkout = $this->addAoToWorkout($existingWorkout, $workout['AO_ID'], $workout['AO']);
-				}
-				if (!is_null($workout['Q_ID'])) {
-					$existingWorkout = $workoutsArray[$workoutId];
-					$existingWorkout = $this->addQToWorkout($existingWorkout, $workout['Q_ID'], $workout['Q']);
-				}
-			}
+			$workoutObj = $this->createWorkoutObj($workout);
+			$workoutsArray[] = $workoutObj;
 		}
 		
 		return $workoutsArray;
 	}
+
 	private function createWorkoutObj($workout): Workout {
 		$workoutObj = new Workout();
-		                
+		
 		error_log(message: 'createWorkoutObj workout: ' . json_encode($workout));
 
 		$aoArray = array();
-		// only add the AO if it exists
-		if (!is_null(value: $workout['AO_ID'])) {
-			$ao = new AO();
-			$ao->setId(id: $workout['AO_ID']);
-			$ao->setDescription(description: $workout['AO']);
-			$aoArray[$workout['AO_ID']] = $ao;
+		// AO_ID and AO description are comma delimited list, so we need to split it
+		if (!is_null(value: $workout['AO_IDS'])) {
+			$aoIds = explode(',', $workout['AO_IDS']);
+			$aoDescriptions = explode(',', $workout['AO']);
+	
+			for ($i = 0; $i < count($aoIds); $i++) {
+				$aoId = trim(string: $aoIds[$i]);
+				$aoDescription = trim(string: $aoDescriptions[$i]);
+	
+				// only add the AO if it exists
+				if (!is_null(value: $aoId) && $aoId !== '') {
+					$ao = new AO();
+					$ao->setId(id: $aoId);
+					$ao->setDescription(description: $aoDescription);
+					$aoArray[] = $ao;
+				}
+			}
 		}
 		$workoutObj->setAo(ao: $aoArray);
 		
 		$qArray = array();
-		// only add the Q if it exists
-		if (!is_null($workout['Q_ID'])) {
-			$q = new Member();
-			$q->setMemberId(memberId: $workout['Q_ID']);
-			$q->setF3Name(f3Name: $workout['Q']);
-			$qArray[$workout['Q_ID']] = $q;
+		// Q_ID and Q name are comma delimited list, so we need to split it
+		if (!is_null($workout['Q_IDS'])) {
+			$qIds = explode(',', $workout['Q_IDS']);
+			$qNames = explode(',', $workout['Q']);
+
+			for ($i = 0; $i < count($qIds); $i++) {
+				$qId = trim(string: $qIds[$i]);
+				$qName = trim(string: $qNames[$i]);
+
+				// only add the Q if it exists
+				if (!is_null(value: $qId) && $qId !== '') {
+					$q = new Member();
+					$q->setMemberId(memberId: $qId);
+					$q->setF3Name(f3Name: $qName);
+					$qArray[] = $q;
+				}
+			}
 		}
 		$workoutObj->setQ(q: $qArray);
 		
@@ -552,5 +595,9 @@ class WorkoutService {
 		}
 
 		return $dateArray;
+	}
+
+	private function getOffset($page, $pageSize): int {
+		return ($page - 1) * $pageSize;
 	}
 }

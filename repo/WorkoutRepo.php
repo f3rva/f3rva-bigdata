@@ -143,6 +143,76 @@ class WorkoutRepository {
 		return str_replace('::{WHERE_CLAUSE}::', $whereClauses, $query);
 	}
 
+		public function findAll($limit = 20, $offset = 0): array {
+		$stmt = $this->db->prepare('
+			select
+					w.WORKOUT_ID,
+					w.WORKOUT_DATE,
+					w.TITLE,
+					w.AUTHOR,
+					w.SLUG,
+					w.BACKBLAST_URL,
+					ao_agg.AO_IDS,
+					ao_agg.AO_DESCRIPTIONS AS AO,
+					q_agg.Q_IDS,
+					q_agg.Q_NAMES AS Q,
+					COUNT(mp.F3_NAME) AS PAX_COUNT
+			from
+					WORKOUT w
+			-- Subquery 1: Aggregate Qs
+			left outer join
+					(
+							select
+									wq.WORKOUT_ID,
+									GROUP_CONCAT(mq.MEMBER_ID SEPARATOR \', \') AS Q_IDS,
+									GROUP_CONCAT(mq.F3_NAME SEPARATOR \', \') AS Q_NAMES
+							from
+									WORKOUT_Q wq
+							inner join
+									MEMBER mq ON wq.MEMBER_ID = mq.MEMBER_ID
+							group by
+									wq.WORKOUT_ID
+					) q_agg ON w.WORKOUT_ID = q_agg.WORKOUT_ID
+			-- Subquery 2: Aggregate AOs
+			left outer join
+					(
+							select
+									wao.WORKOUT_ID,
+									GROUP_CONCAT(ao.AO_ID SEPARATOR \', \') AS AO_IDS,
+									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS
+							from
+									WORKOUT_AO wao
+							inner join
+									AO ao ON wao.AO_ID = ao.AO_ID
+							group by
+									wao.WORKOUT_ID
+					) ao_agg ON w.WORKOUT_ID = ao_agg.WORKOUT_ID
+			-- Join for PAX count
+			left outer join
+					WORKOUT_PAX wp ON w.WORKOUT_ID = wp.WORKOUT_ID
+			left outer join
+					MEMBER mp ON wp.MEMBER_ID = mp.MEMBER_ID
+			group by
+					w.WORKOUT_ID,
+					w.WORKOUT_DATE,
+					w.TITLE,
+					w.AUTHOR,
+					w.SLUG,
+					w.BACKBLAST_URL,
+					ao_agg.AO_IDS,
+					ao_agg.AO_DESCRIPTIONS,
+					q_agg.Q_IDS,
+					q_agg.Q_NAMES
+			order by
+					w.WORKOUT_DATE DESC,
+					ao_agg.AO_DESCRIPTIONS ASC
+			limit ? offset ?;
+		');
+		$stmt->execute([$limit, $offset]);
+
+		return $stmt->fetchAll();
+	}
+
 	public function findAllByDateRange($startDate, $endDate, $limit = 20, $offset = 0) {
 		$stmt = $this->db->prepare('
 			select
@@ -192,10 +262,9 @@ class WorkoutRepository {
 					WORKOUT_PAX wp ON w.WORKOUT_ID = wp.WORKOUT_ID
 			left outer join
 					MEMBER mp ON wp.MEMBER_ID = mp.MEMBER_ID
-
-			WHERE
+			where
 					w.WORKOUT_DATE between ? and ?
-			GROUP BY
+			group by
 					w.WORKOUT_ID,
 					w.WORKOUT_DATE,
 					w.TITLE,
@@ -206,10 +275,10 @@ class WorkoutRepository {
 					ao_agg.AO_DESCRIPTIONS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES
-			ORDER BY
+			order by
 					w.WORKOUT_DATE DESC,
 					ao_agg.AO_DESCRIPTIONS ASC
-			LIMIT ? OFFSET ?;
+			limit ? offset ?;
 		');
 		$stmt->execute([$startDate, $endDate, $limit, $offset]);
 

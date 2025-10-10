@@ -59,6 +59,12 @@ class WorkoutService {
 		return $this->processWorkoutResults($workouts);
 	}
 
+	public function getRecentWorkouts($page = self::DEFAULT_PAGE, $pageSize = self::DEFAULT_PAGE_SIZE): array {
+		$workouts = $this->workoutRepo->findAll($pageSize, $this->getOffset($page, $pageSize));
+		
+		return $this->processWorkoutResults($workouts);
+	}
+
 	public function getWorkoutsByYear($year, $page = self::DEFAULT_PAGE, $pageSize = self::DEFAULT_PAGE_SIZE): array {
 		// use the year to call findAllByDateRange to get all the workouts for that year
 		$startDate = DateUtil::getStartDateOfYear(year: $year);

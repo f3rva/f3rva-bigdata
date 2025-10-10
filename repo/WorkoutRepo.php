@@ -82,6 +82,7 @@ class WorkoutRepository {
 					w.WORKOUT_ID,
 					w.WORKOUT_DATE,
 					w.TITLE,
+					w.AUTHOR,
 					w.SLUG,
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
@@ -129,6 +130,7 @@ class WorkoutRepository {
 					w.WORKOUT_ID,
 					w.WORKOUT_DATE,
 					w.TITLE,
+					w.AUTHOR,
 					w.SLUG,
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
@@ -147,6 +149,7 @@ class WorkoutRepository {
 					w.WORKOUT_ID,
 					w.WORKOUT_DATE,
 					w.TITLE,
+					w.AUTHOR,
 					w.SLUG,
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
@@ -196,6 +199,7 @@ class WorkoutRepository {
 					w.WORKOUT_ID,
 					w.WORKOUT_DATE,
 					w.TITLE,
+					w.AUTHOR,
 					w.SLUG,
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
@@ -218,6 +222,7 @@ class WorkoutRepository {
 					w.WORKOUT_ID,
 					w.WORKOUT_DATE,
 					w.TITLE,
+					w.AUTHOR,
 					w.SLUG,
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
@@ -275,6 +280,7 @@ class WorkoutRepository {
 					w.WORKOUT_ID,
 					w.WORKOUT_DATE,
 					w.TITLE,
+					w.AUTHOR,
 					w.SLUG,
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
@@ -531,14 +537,14 @@ class WorkoutRepository {
 		return $stmt->fetch()["MAX_DATE"];
 	}
 	
-	public function save($title, $slug, $dateArray, $url): bool|string {
+	public function save($title, $author, $slug, $dateArray, $url): bool|string {
 		$stmt = $this->db->prepare(query: '
-			insert into WORKOUT(TITLE, SLUG, WORKOUT_DATE, BACKBLAST_URL) values (?, ?, ?, ?)
+			insert into WORKOUT(TITLE, AUTHOR, SLUG, WORKOUT_DATE, BACKBLAST_URL) values (?, ?, ?, ?, ?)
 		');
 		
 		$dateStr = $this->getDateString(dateArray: $dateArray);
 
-		$stmt->execute(params: [$title, $slug, $dateStr, $url]);
+		$stmt->execute(params: [$title, $author, $slug, $dateStr, $url]);
 		
 		return $this->db->lastInsertId();
 	}
@@ -603,15 +609,15 @@ class WorkoutRepository {
 		return $ao;
 	}
 	
-	public function update($workoutId, $title, $slug, $dateArray, $url): void {
+	public function update($workoutId, $title, $author, $slug, $dateArray, $url): void {
 		$stmt = $this->db->prepare(query: '
-			update WORKOUT set TITLE=?, SLUG=?, WORKOUT_DATE=?, BACKBLAST_URL=?
+			update WORKOUT set TITLE=?, AUTHOR=?, SLUG=?, WORKOUT_DATE=?, BACKBLAST_URL=?
 				where WORKOUT_ID=?
 		');
 		
 		$dateStr = $this->getDateString(dateArray: $dateArray);
 		
-		$stmt->execute(params: [$title, $slug, $dateStr, $url, $workoutId]);
+		$stmt->execute(params: [$title, $author, $slug, $dateStr, $url, $workoutId]);
 	}
 	
 	private function getDateString($dateArray) {

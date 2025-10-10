@@ -5,6 +5,7 @@ class Workout implements \JsonSerializable {
 	private $workoutId;
 	private $backblastUrl;
 	private $title;
+	private $author;
 	private $slug;
 	private $ao;
 	private $q;
@@ -37,6 +38,14 @@ class Workout implements \JsonSerializable {
 		$this->title= $title;
 	}
 	
+	public function getAuthor(): mixed {
+		return $this->author;
+	}
+
+	public function setAuthor($author): void {
+		$this->author= $author;
+	}
+
 	public function getSlug(): mixed {
 		return $this->slug;
 	}
@@ -99,6 +108,7 @@ class Workout implements \JsonSerializable {
 			'workoutId' => $this->workoutId,
 			'backblastUrl' => $this->backblastUrl,
 			'title' => $this->title,
+			'author' => $this->author,
 			'slug' => $this->slug,
 			'ao' => $this->ao,
 			'q' => $this->q,

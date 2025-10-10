@@ -181,6 +181,11 @@ class WorkoutService {
 		return $workoutObj;
 	}
 
+	/**
+	 * Add a workout.  This is a legacy call which scrapes the backblast URL again.
+	 * 
+	 * @deprecated use addWorkoutWithData instead
+	 */
 	public function addWorkout($data) {
 		$additionalInfo = $data->additionalInfo ?? null;
 		// parse the post to get the information we need
@@ -199,7 +204,7 @@ class WorkoutService {
 				
 				// insert the workout
 				//error_log('adding workout: ' . $data->post->title . ' | ' . $additionalInfo->dateTime . '|' . $data->post->url);
-				$workoutId = $this->workoutRepo->save(title: $data->post->title, slug: null, 
+				$workoutId = $this->workoutRepo->save(title: $data->post->title, author: null, slug: null, 
 					dateArray: $additionalInfo->date, url: $data->post->url);
 				
 				// add the aos
@@ -226,6 +231,7 @@ class WorkoutService {
 	public function addWorkoutWithData($data): bool|string|null {
 		$title = $data->title ?? null;
 		$url = $data->url ?? null;
+		$author = $data->author ?? null;
 		$slug = $data->slug ?? null;
 		$body = $data->body ?? null;
 		$workoutDate = $this->parseDateStringToDateArray(dateString: $data->workoutDate);
@@ -242,7 +248,7 @@ class WorkoutService {
 				$db->beginTransaction();
 				
 				// insert the workout
-				$workoutId = $this->workoutRepo->save(title: $title, slug: $slug, dateArray: $workoutDate, url: $url);
+				$workoutId = $this->workoutRepo->save(title: $title, author: $author, slug: $slug, dateArray: $workoutDate, url: $url);
 				
 				// add the details
 				$this->saveWorkoutDetails(workoutId: $workoutId, body: $body);
@@ -269,6 +275,11 @@ class WorkoutService {
 		return $workoutId;
 	}
 
+	/**
+	 * Refresh a workout by its ID.  This is a legacy call which scrapes the backblast URL again.
+	 * 
+	 * @deprecated use refreshWorkoutWithData instead
+	 */
 	public function refreshWorkout($workoutId) {
 		// get the workout
 		$workout = $this->getWorkout($workoutId);
@@ -284,7 +295,7 @@ class WorkoutService {
 				$db->beginTransaction();
 				
 				// update the workout
-				$this->workoutRepo->update(workoutId: $workoutId, title: $workout->getTitle(), 
+				$this->workoutRepo->update(workoutId: $workoutId, title: $workout->getTitle(), author: null,
 					slug: null, dateArray: $additionalInfo->date, url: $workout->getBackblastUrl());
 				
 				// delete the previous details
@@ -323,6 +334,7 @@ class WorkoutService {
 	public function refreshWorkoutWithData($data) {
 		$workoutId = $data->workoutId ?? null;
 		$title = $data->title ?? null;
+		$author = $data->author ?? null;
 		$url = $data->url ?? null;
 		$slug = $data->slug ?? null;
 		$body = $data->body ?? null;
@@ -338,7 +350,7 @@ class WorkoutService {
 				$db->beginTransaction();
 				
 				// update the workout
-				$this->workoutRepo->update(workoutId: $workoutId, title: $title, slug: $slug, dateArray: $workoutDate, url: $url);
+				$this->workoutRepo->update(workoutId: $workoutId, title: $title, author: $author, slug: $slug, dateArray: $workoutDate, url: $url);
 				
 				// delete the previous details
 				$this->workoutRepo->deleteWorkoutDetails(workoutId: $workoutId);
@@ -487,6 +499,7 @@ class WorkoutService {
 		
 		$workoutObj->setBackblastUrl(backblastUrl: $workout['BACKBLAST_URL']);
 		$workoutObj->setTitle(title: $workout['TITLE']);
+		$workoutObj->setAuthor(author: $workout['AUTHOR']);
 		$workoutObj->setSlug(slug: $workout['SLUG']);
 		$workoutObj->setWorkoutId(workoutId: $workout['WORKOUT_ID']);
 		$workoutObj->setWorkoutDate(workoutDate: $workout['WORKOUT_DATE']);

@@ -518,7 +518,7 @@ class WorkoutService {
 
 		// only set if PAX_COUNT is there
 		if (array_key_exists(key: 'PAX_COUNT', array: $workout)) {
-			$workoutObj->setPaxCount(paxCount: $workout['PAX_COUNT']);
+			$workoutObj->setPaxCount(paxCount: (int) $workout['PAX_COUNT']);
 		}
 		
 		return $workoutObj;

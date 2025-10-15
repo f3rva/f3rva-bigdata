@@ -1,7 +1,7 @@
 <?php
 namespace F3\Model;
 
-class AO {
+class AO implements \JsonSerializable {
 	private $id;
 	private $description;
 	
@@ -19,5 +19,13 @@ class AO {
 	
 	public function setDescription($description) {
 		$this->description = $description;
+	}
+
+	public function jsonSerialize(): mixed
+	{
+		return [
+			'id' => $this->id,
+			'description' => $this->description
+		];
 	}
 }

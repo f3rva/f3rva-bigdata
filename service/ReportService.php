@@ -231,21 +231,21 @@ class ReportService {
 		
 		// this needs to be refactored.  Not very efficient
 		foreach ($qWorkouts as $workout) {
-			foreach ($workout->getAo() as $aoId => $ao) {
-				if (!isset($series[$aoId])) {
-					$series[$aoId] = [$ao, 0, 0];
+			foreach ($workout->getAo() as $ao) {
+				if (!isset($series[$ao->getId()])) {
+					$series[$ao->getId()] = [$ao->getDescription(), 0, 0];
 				}
 				
-				$series[$aoId][1] = $series[$aoId][1] + 1;
+				$series[$ao->getId()][1] = $series[$ao->getId()][1] + 1;
 			}
 		}
 		foreach ($paxWorkouts as $workout) {
-			foreach ($workout->getAo() as $aoId => $ao) {
-				if (!isset($series[$aoId])) {
-					$series[$aoId] = [$ao, 0, 0];
+			foreach ($workout->getAo() as $ao) {
+				if (!isset($series[$ao->getId()])) {
+					$series[$ao->getId()] = [$ao->getDescription(), 0, 0];
 				}
 				
-				$series[$aoId][2] = $series[$aoId][2] + 1;
+				$series[$ao->getId()][2] = $series[$ao->getId()][2] + 1;
 			}
 		}
 		

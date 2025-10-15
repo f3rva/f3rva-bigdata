@@ -44,15 +44,15 @@ use F3\Util\DateUtil;
 			<td><a href="<?= $workout->getBackblastUrl() ?>" target="_blank"><?= $workout->getTitle() ?></a></td>
 			<td>
 				<ul class="list-unstyled">
-				<? foreach ($workout->getAo() as $aoId => $ao) { ?>
-					<li><a href="/ao/detail.php?id=<?= $aoId ?>"><?= $ao ?></a></li>
+				<? foreach ($workout->getAo() as $ao) { ?>
+					<li><a href="/ao/detail.php?id=<?= $ao->getId() ?>"><?= $ao->getDescription() ?></a></li>
 				<? } ?>
 				</ul>
 			</td>
 			<td>
 	        	<ul class="list-unstyled">
-	        	<? foreach ($workout->getQ() as $qId => $q) { ?>
-	        		<li><a href="/member/detail.php?id=<?= $qId ?>"><?= $q ?></a></li>
+	        	<? foreach ($workout->getQ() as $q) { ?>
+	        		<li><a href="/member/detail.php?id=<?= $q->getMemberId() ?>"><?= $q->getF3Name() ?></a></li>
 	        	<? } ?>
 	        	</ul>
 			</td>

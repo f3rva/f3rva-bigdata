@@ -10,13 +10,15 @@
       "request": "launch",
       "runtimeArgs": [
         "-S",
-        "localhost:8000",
+        "localhost:9000",
         "-t",
         ".",
         "-d",
+        "xdebug.mode=debug",
+        "-d",
         "short_open_tag=true"
       ],
-      "port": 9000,
+      "port": 9003,
       "serverReadyAction": {
         "action": "openExternally"
       }

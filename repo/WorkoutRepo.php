@@ -206,7 +206,7 @@ class WorkoutRepository {
 			order by
 					w.WORKOUT_DATE DESC,
 					ao_agg.AO_DESCRIPTIONS ASC
-			limit ? offset ?;
+			limit ? offset ?
 		');
 		$stmt->execute([$limit, $offset]);
 
@@ -278,7 +278,7 @@ class WorkoutRepository {
 			order by
 					w.WORKOUT_DATE DESC,
 					ao_agg.AO_DESCRIPTIONS ASC
-			limit ? offset ?;
+			limit ? offset ?
 		');
 		$stmt->execute([$startDate, $endDate, $limit, $offset]);
 
@@ -359,7 +359,7 @@ class WorkoutRepository {
 					pax_count_agg.PAX_COUNT
 			order by 
 					w.WORKOUT_DATE DESC,
-					ao_agg.AO_DESCRIPTIONS ASC;
+					ao_agg.AO_DESCRIPTIONS ASC
 		';
 
 		$query = str_replace('::{JOINS}::', $joins, $query);
@@ -368,13 +368,28 @@ class WorkoutRepository {
 		return $query;
 	}	
 	
-	public function findAllByAO($aoId): array {
+	public function findAllByAO($aoId, $limit = 20, $offset = 0): array {
 		$query = $this->replaceFindByPluralPlaceholders(
 			joins: 'WORKOUT_AO wao_filter ON w.WORKOUT_ID = wao_filter.WORKOUT_ID', 
 			whereClauses: 'wao_filter.AO_ID = ?');
-			
+		
+		$query .= ' limit ? offset ?';
+
 		$stmt = $this->db->prepare($query);
-		$stmt->execute([$aoId]);
+		$stmt->execute([$aoId, $limit, $offset]);
+
+		return $stmt->fetchAll();
+	}
+
+	public function findAllByAoDescription($name, $limit = 20, $offset = 0): array {
+		$query = $this->replaceFindByPluralPlaceholders(
+			joins: 'WORKOUT_AO wao_filter ON w.WORKOUT_ID = wao_filter.WORKOUT_ID JOIN AO ao_filter ON wao_filter.AO_ID = ao_filter.AO_ID', 
+			whereClauses: 'upper(ao_filter.DESCRIPTION) = upper(?)');
+		
+		$query .= ' limit ? offset ?';
+
+		$stmt = $this->db->prepare($query);
+		$stmt->execute([$name, $limit, $offset]);
 
 		return $stmt->fetchAll();
 	}

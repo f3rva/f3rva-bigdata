@@ -98,8 +98,16 @@ class WorkoutService {
 		return $this->processWorkoutResults($workouts);
 	}
 	
-	public function getWorkoutsByAo($aoId) {
-		$workouts = $this->workoutRepo->findAllByAo($aoId);
+	public function getWorkoutsByAo($aoId, $page = self::DEFAULT_PAGE, $pageSize = self::DEFAULT_PAGE_SIZE) {
+		$offset = $this->getOffset(page: $page, pageSize: $pageSize);
+		$workouts = $this->workoutRepo->findAllByAo($aoId, $pageSize, $offset);
+		
+		return $this->processWorkoutResults($workouts);
+	}
+
+	public function getWorkoutsByAoName($name, $page = self::DEFAULT_PAGE, $pageSize = self::DEFAULT_PAGE_SIZE) {
+		$offset = $this->getOffset(page: $page, pageSize: $pageSize);
+		$workouts = $this->workoutRepo->findAllByAoDescription($name, $pageSize, $offset);
 		
 		return $this->processWorkoutResults($workouts);
 	}

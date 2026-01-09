@@ -30,7 +30,7 @@ The project follows a service-oriented architecture without a heavy framework, u
 ### Local Development
 To run the application locally using the built-in PHP server:
 ```bash
-php -S localhost:9000 -d xdebug.mode=debug -d short_open_tag=true
+php -S localhost:8000 -d xdebug.mode=debug -d short_open_tag=true
 ```
 *   **Dependencies:** JavaScript and CSS dependencies are vendored in `js/` and `css/`. No `npm` or `composer` installation is required for basic execution.
 *   **Configuration:** A `settings.php` file is required in the root directory for database credentials (referenced in `repo/Database.php`).

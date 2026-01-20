@@ -6,9 +6,11 @@ if (!defined('__ROOT__')) {
 }
 require_once(__ROOT__ . '/service/ReportService.php');
 require_once(__ROOT__ . '/service/WorkoutService.php');
+require_once(__ROOT__ . '/repo/WorkoutRepo.php');
 
 use F3\Service\ReportService;
 use F3\Service\WorkoutService;
+use F3\Repo\WorkoutRepository;
 ?>
 
 <!DOCTYPE html>
@@ -23,7 +25,18 @@ use F3\Service\WorkoutService;
 <?
 	$reportService = new ReportService();
 	$workoutService = new WorkoutService();
-	$aoId = $_REQUEST['id'];
+	$workoutRepo = new WorkoutRepository();
+	$aoSlug = $_REQUEST['slug'];
+	
+	// Get the AO by slug to get the AO_ID
+	$aoData = $workoutRepo->findAoBySlug($aoSlug);
+	if (!$aoData) {
+		// AO not found
+		http_response_code(404);
+		echo 'AO not found';
+		exit;
+	}
+	$aoId = $aoData['AO_ID'];
 	
 	$workouts = $workoutService->getWorkoutsByAo($aoId, 1, 8192);
 	$aoAverages = $reportService->getAverageAttendanceByAO(null, null);

@@ -112,7 +112,8 @@ class WorkoutRepository {
 							select
 									wao.WORKOUT_ID,
 									GROUP_CONCAT(ao.AO_ID SEPARATOR \', \') AS AO_IDS,
-									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS
+									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS,
+									GROUP_CONCAT(ao.SLUG SEPARATOR \', \') AS AO_SLUGS
 							from
 									WORKOUT_AO wao
 							inner join
@@ -135,6 +136,7 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS,
+					ao_agg.AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES,
 					wd.HTML_CONTENT; -- Include the 1:1/1:0 column in the GROUP BY
@@ -200,8 +202,7 @@ class WorkoutRepository {
 					w.SLUG,
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
-					ao_agg.AO_DESCRIPTIONS,
-					q_agg.Q_IDS,
+					ao_agg.AO_DESCRIPTIONS,					ao_agg.AO_SLUGS,					q_agg.Q_IDS,
 					q_agg.Q_NAMES
 			order by
 					w.WORKOUT_DATE DESC,
@@ -249,7 +250,8 @@ class WorkoutRepository {
 							select
 									wao.WORKOUT_ID,
 									GROUP_CONCAT(ao.AO_ID SEPARATOR \', \') AS AO_IDS,
-									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS
+									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS,
+									GROUP_CONCAT(ao.SLUG SEPARATOR \', \') AS AO_SLUGS
 							from
 									WORKOUT_AO wao
 							inner join
@@ -273,6 +275,7 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS,
+					ao_agg.AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES
 			order by
@@ -324,7 +327,8 @@ class WorkoutRepository {
 							select
 									wao.WORKOUT_ID,
 									GROUP_CONCAT(ao.AO_ID SEPARATOR \', \') AS AO_IDS,
-									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS
+									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS,
+									GROUP_CONCAT(ao.SLUG SEPARATOR \', \') AS AO_SLUGS
 							from
 									WORKOUT_AO wao
 							inner join
@@ -354,6 +358,7 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS,
+					ao_agg.AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES,
 					pax_count_agg.PAX_COUNT
@@ -518,9 +523,18 @@ class WorkoutRepository {
 	
 	public function findAo($aoId) {
 		$stmt = $this->db->prepare('
-			select AO_ID, DESCRIPTION from AO where AO_ID=?
+			select AO_ID, DESCRIPTION, SLUG from AO where AO_ID=?
 		');
 		$stmt->execute([$aoId]);
+		
+		return $stmt->fetch();
+	}
+
+	public function findAoBySlug($slug) {
+		$stmt = $this->db->prepare('
+			select AO_ID, DESCRIPTION, SLUG from AO where upper(SLUG) = upper(?)
+		');
+		$stmt->execute([$slug]);
 		
 		return $stmt->fetch();
 	}
@@ -555,8 +569,8 @@ class WorkoutRepository {
 	
 	public function findAverageAttendanceByAO($startDate, $endDate) {
 		$sql = '
-			select wc.AO_ID, wc.DESCRIPTION, avg(wc.count) as AVERAGE from (
-				select wa.AO_ID, ao.DESCRIPTION, count(*) as count from WORKOUT_PAX wp
+		select wc.AO_ID, wc.DESCRIPTION, wc.SLUG, avg(wc.count) as AVERAGE from (
+			select wa.AO_ID, ao.DESCRIPTION, ao.SLUG, count(*) as count from WORKOUT_PAX wp
 				join WORKOUT_AO wa on wp.WORKOUT_ID = wa.WORKOUT_ID
 			    join AO ao on wa.AO_ID = ao.AO_ID
 			    join WORKOUT w on wa.WORKOUT_ID = w.WORKOUT_ID
@@ -573,7 +587,7 @@ class WorkoutRepository {
 				group by wp.WORKOUT_ID, wa.AO_ID
 			    order by AO_ID asc
 			) wc
-			group by wc.AO_ID, wc.DESCRIPTION
+			group by wc.AO_ID, wc.DESCRIPTION, wc.SLUG
 			order by AVERAGE desc
 		';
 		

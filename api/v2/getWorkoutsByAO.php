@@ -18,10 +18,10 @@ function init_response(): void {
 	header(header: 'Content-Type: application/json');
 }
 
-function validateInput($aoId, $name, $page, $resultsPerPage): void {
-	// validate aoId or name
-	if ((is_null(value: $aoId) || $aoId === '') && (is_null(value: $name) || $name === '')) {
-		exit_error(status: 400, code: 1008, message: 'Invalid AO ID or Name');
+function validateInput($aoId, $slug, $page, $resultsPerPage): void {
+	// validate aoId or slug
+	if ((is_null(value: $aoId) || $aoId === '') && (is_null(value: $slug) || $slug === '')) {
+		exit_error(status: 400, code: 1008, message: 'Invalid AO ID or Slug');
 	}
 
 	// page and results per page must be positive integers
@@ -44,18 +44,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 	init_response();
 	
 	$aoId = $_REQUEST['id'] ?? null;
-	$name = $_REQUEST['name'] ?? null;
+	$slug = $_REQUEST['slug'] ?? null;
 	$page = $_REQUEST['page'] ?? 1;
 	$resultsPerPage = $_REQUEST['results'] ?? 20;
 
-	validateInput(aoId: $aoId, name: $name, page: $page, resultsPerPage: $resultsPerPage);
+	validateInput(aoId: $aoId, slug: $slug, page: $page, resultsPerPage: $resultsPerPage);
 	
 	$workoutService = new WorkoutService();
 	
 	if (!is_null(value: $aoId) && $aoId !== '') {
 		$workouts = $workoutService->getWorkoutsByAo(aoId: $aoId, page: $page, pageSize: $resultsPerPage);
 	} else {
-		$workouts = $workoutService->getWorkoutsByAoName(name: $name, page: $page, pageSize: $resultsPerPage);
+		$workouts = $workoutService->getWorkoutsByAoSlug(slug: $slug, page: $page, pageSize: $resultsPerPage);
 	}
 
 	if (is_null(value: $workouts) || empty($workouts)) {

@@ -394,6 +394,19 @@ class WorkoutRepository {
 		return $stmt->fetchAll();
 	}
 
+	public function findAllByAoSlug($slug, $limit = 20, $offset = 0): array {
+		$query = $this->replaceFindByPluralPlaceholders(
+			joins: 'WORKOUT_AO wao_filter ON w.WORKOUT_ID = wao_filter.WORKOUT_ID JOIN AO ao_filter ON wao_filter.AO_ID = ao_filter.AO_ID', 
+			whereClauses: 'upper(ao_filter.SLUG) = upper(?)');
+		
+		$query .= ' limit ? offset ?';
+
+		$stmt = $this->db->prepare($query);
+		$stmt->execute([$slug, $limit, $offset]);
+
+		return $stmt->fetchAll();
+	}
+
 	public function findAllByQ($qId) {
 		$query = $this->replaceFindByPluralPlaceholders(
 			joins: 'WORKOUT_Q wq_filter ON w.WORKOUT_ID = wq_filter.WORKOUT_ID', 

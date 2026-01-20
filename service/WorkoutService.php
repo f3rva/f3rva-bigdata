@@ -111,6 +111,13 @@ class WorkoutService {
 		
 		return $this->processWorkoutResults($workouts);
 	}
+
+	public function getWorkoutsByAoSlug($slug, $page = self::DEFAULT_PAGE, $pageSize = self::DEFAULT_PAGE_SIZE) {
+		$offset = $this->getOffset(page: $page, pageSize: $pageSize);
+		$workouts = $this->workoutRepo->findAllByAoSlug($slug, $pageSize, $offset);
+		
+		return $this->processWorkoutResults($workouts);
+	}
 	
 	public function getWorkoutsByQ($qId) {
 		$workouts = $this->workoutRepo->findAllByQ($qId);

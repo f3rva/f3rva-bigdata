@@ -140,7 +140,7 @@ class ReportService {
 			$summary->setValue($aoAverage['AVERAGE']);
 			$summary->setId($aoAverage['AO_ID']);
 			$summary->setDescription($aoAverage['DESCRIPTION']);
-			
+			$summary->setSlug($aoAverage['SLUG']);			
 			$aoArray[$aoAverage['AO_ID']] = $summary;
 		}
 		

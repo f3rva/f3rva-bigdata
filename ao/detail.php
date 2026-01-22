@@ -25,7 +25,7 @@ use F3\Service\WorkoutService;
 	$workoutService = new WorkoutService();
 	$aoId = $_REQUEST['id'];
 	
-	$workouts = $workoutService->getWorkoutsByAo($aoId);
+	$workouts = $workoutService->getWorkoutsByAo($aoId, 1, 8192);
 	$aoAverages = $reportService->getAverageAttendanceByAO(null, null);
 	$topQs = $reportService->getTopQsByAO($aoId, 10, 0);
 	$topPax = $reportService->getTopPAXByAO($aoId, 10, 0);

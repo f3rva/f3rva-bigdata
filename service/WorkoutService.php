@@ -98,8 +98,23 @@ class WorkoutService {
 		return $this->processWorkoutResults($workouts);
 	}
 	
-	public function getWorkoutsByAo($aoId) {
-		$workouts = $this->workoutRepo->findAllByAo($aoId);
+	public function getWorkoutsByAo($aoId, $page = self::DEFAULT_PAGE, $pageSize = self::DEFAULT_PAGE_SIZE) {
+		$offset = $this->getOffset(page: $page, pageSize: $pageSize);
+		$workouts = $this->workoutRepo->findAllByAo($aoId, $pageSize, $offset);
+		
+		return $this->processWorkoutResults($workouts);
+	}
+
+	public function getWorkoutsByAoName($name, $page = self::DEFAULT_PAGE, $pageSize = self::DEFAULT_PAGE_SIZE) {
+		$offset = $this->getOffset(page: $page, pageSize: $pageSize);
+		$workouts = $this->workoutRepo->findAllByAoDescription($name, $pageSize, $offset);
+		
+		return $this->processWorkoutResults($workouts);
+	}
+
+	public function getWorkoutsByAoSlug($slug, $page = self::DEFAULT_PAGE, $pageSize = self::DEFAULT_PAGE_SIZE) {
+		$offset = $this->getOffset(page: $page, pageSize: $pageSize);
+		$workouts = $this->workoutRepo->findAllByAoSlug($slug, $pageSize, $offset);
 		
 		return $this->processWorkoutResults($workouts);
 	}
@@ -466,16 +481,19 @@ class WorkoutService {
 		if (!is_null(value: $workout['AO_IDS'])) {
 			$aoIds = explode(',', $workout['AO_IDS']);
 			$aoDescriptions = explode(',', $workout['AO']);
+			$aoSlugs = explode(',', $workout['AO_SLUGS']);
 	
 			for ($i = 0; $i < count($aoIds); $i++) {
 				$aoId = trim(string: $aoIds[$i]);
 				$aoDescription = trim(string: $aoDescriptions[$i]);
+				$aoSlug = trim(string: $aoSlugs[$i]);
 	
 				// only add the AO if it exists
 				if (!is_null(value: $aoId) && $aoId !== '') {
 					$ao = new AO();
 					$ao->setId(id: $aoId);
 					$ao->setDescription(description: $aoDescription);
+					$ao->setSlug(slug: $aoSlug);
 					$aoArray[] = $ao;
 				}
 			}

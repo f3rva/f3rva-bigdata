@@ -87,6 +87,7 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS AS AO,
+					ao_agg.AO_SLUGS AS AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES AS Q,
 					wd.HTML_CONTENT -- HTML_CONTENT is outside the aggregation as it is 1:1
@@ -112,7 +113,8 @@ class WorkoutRepository {
 							select
 									wao.WORKOUT_ID,
 									GROUP_CONCAT(ao.AO_ID SEPARATOR \', \') AS AO_IDS,
-									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS
+									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS,
+									GROUP_CONCAT(ao.SLUG SEPARATOR \', \') AS AO_SLUGS
 							from
 									WORKOUT_AO wao
 							inner join
@@ -135,6 +137,7 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS,
+					ao_agg.AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES,
 					wd.HTML_CONTENT; -- Include the 1:1/1:0 column in the GROUP BY
@@ -154,6 +157,7 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS AS AO,
+					ao_agg.AO_SLUGS AS AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES AS Q,
 					COUNT(mp.F3_NAME) AS PAX_COUNT
@@ -179,7 +183,8 @@ class WorkoutRepository {
 							select
 									wao.WORKOUT_ID,
 									GROUP_CONCAT(ao.AO_ID SEPARATOR \', \') AS AO_IDS,
-									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS
+									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS,
+									GROUP_CONCAT(ao.SLUG SEPARATOR \', \') AS AO_SLUGS
 							from
 									WORKOUT_AO wao
 							inner join
@@ -201,12 +206,13 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS,
+					ao_agg.AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES
 			order by
 					w.WORKOUT_DATE DESC,
 					ao_agg.AO_DESCRIPTIONS ASC
-			limit ? offset ?;
+			limit ? offset ?
 		');
 		$stmt->execute([$limit, $offset]);
 
@@ -224,6 +230,7 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS AS AO,
+					ao_agg.AO_SLUGS as AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES AS Q,
 					COUNT(mp.F3_NAME) AS PAX_COUNT
@@ -249,7 +256,8 @@ class WorkoutRepository {
 							select
 									wao.WORKOUT_ID,
 									GROUP_CONCAT(ao.AO_ID SEPARATOR \', \') AS AO_IDS,
-									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS
+									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS,
+									GROUP_CONCAT(ao.SLUG SEPARATOR \', \') AS AO_SLUGS
 							from
 									WORKOUT_AO wao
 							inner join
@@ -273,12 +281,13 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS,
+					ao_agg.AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES
 			order by
 					w.WORKOUT_DATE DESC,
 					ao_agg.AO_DESCRIPTIONS ASC
-			limit ? offset ?;
+			limit ? offset ?
 		');
 		$stmt->execute([$startDate, $endDate, $limit, $offset]);
 
@@ -296,6 +305,7 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS AS AO,
+					ao_agg.AO_SLUGS AS AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES AS Q,
 					pax_count_agg.PAX_COUNT
@@ -324,7 +334,8 @@ class WorkoutRepository {
 							select
 									wao.WORKOUT_ID,
 									GROUP_CONCAT(ao.AO_ID SEPARATOR \', \') AS AO_IDS,
-									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS
+									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS,
+									GROUP_CONCAT(ao.SLUG SEPARATOR \', \') AS AO_SLUGS
 							from
 									WORKOUT_AO wao
 							inner join
@@ -354,12 +365,13 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS,
+					ao_agg.AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES,
 					pax_count_agg.PAX_COUNT
 			order by 
 					w.WORKOUT_DATE DESC,
-					ao_agg.AO_DESCRIPTIONS ASC;
+					ao_agg.AO_DESCRIPTIONS ASC
 		';
 
 		$query = str_replace('::{JOINS}::', $joins, $query);
@@ -368,13 +380,41 @@ class WorkoutRepository {
 		return $query;
 	}	
 	
-	public function findAllByAO($aoId): array {
+	public function findAllByAO($aoId, $limit = 20, $offset = 0): array {
 		$query = $this->replaceFindByPluralPlaceholders(
 			joins: 'WORKOUT_AO wao_filter ON w.WORKOUT_ID = wao_filter.WORKOUT_ID', 
 			whereClauses: 'wao_filter.AO_ID = ?');
-			
+		
+		$query .= ' limit ? offset ?';
+
 		$stmt = $this->db->prepare($query);
-		$stmt->execute([$aoId]);
+		$stmt->execute([$aoId, $limit, $offset]);
+
+		return $stmt->fetchAll();
+	}
+
+	public function findAllByAoDescription($name, $limit = 20, $offset = 0): array {
+		$query = $this->replaceFindByPluralPlaceholders(
+			joins: 'WORKOUT_AO wao_filter ON w.WORKOUT_ID = wao_filter.WORKOUT_ID JOIN AO ao_filter ON wao_filter.AO_ID = ao_filter.AO_ID', 
+			whereClauses: 'upper(ao_filter.DESCRIPTION) = upper(?)');
+		
+		$query .= ' limit ? offset ?';
+
+		$stmt = $this->db->prepare($query);
+		$stmt->execute([$name, $limit, $offset]);
+
+		return $stmt->fetchAll();
+	}
+
+	public function findAllByAoSlug($slug, $limit = 20, $offset = 0): array {
+		$query = $this->replaceFindByPluralPlaceholders(
+			joins: 'WORKOUT_AO wao_filter ON w.WORKOUT_ID = wao_filter.WORKOUT_ID JOIN AO ao_filter ON wao_filter.AO_ID = ao_filter.AO_ID', 
+			whereClauses: 'upper(ao_filter.SLUG) = upper(?)');
+		
+		$query .= ' limit ? offset ?';
+
+		$stmt = $this->db->prepare($query);
+		$stmt->execute([$slug, $limit, $offset]);
 
 		return $stmt->fetchAll();
 	}
@@ -403,7 +443,7 @@ class WorkoutRepository {
 	
 	public function findCount($startDate, $endDate) {
 		$sql = '
-			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
+			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, ao.SLUG as AO_SLUG, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
 				left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
 				left outer join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
 				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
@@ -418,7 +458,7 @@ class WorkoutRepository {
 		}
 		
 		$sql = $sql . '
-				group by w.WORKOUT_ID, ao.AO_ID, ao.DESCRIPTION
+				group by w.WORKOUT_ID, ao.AO_ID, ao.DESCRIPTION, ao.SLUG
 				order by w.WORKOUT_DATE desc, ao.DESCRIPTION asc
 		';
 		$stmt = $this->db->prepare($sql);
@@ -490,9 +530,18 @@ class WorkoutRepository {
 	
 	public function findAo($aoId) {
 		$stmt = $this->db->prepare('
-			select AO_ID, DESCRIPTION from AO where AO_ID=?
+			select AO_ID, DESCRIPTION, SLUG from AO where AO_ID=?
 		');
 		$stmt->execute([$aoId]);
+		
+		return $stmt->fetch();
+	}
+
+	public function findAoBySlug($slug) {
+		$stmt = $this->db->prepare('
+			select AO_ID, DESCRIPTION, SLUG from AO where upper(SLUG) = upper(?)
+		');
+		$stmt->execute([$slug]);
 		
 		return $stmt->fetch();
 	}
@@ -527,8 +576,8 @@ class WorkoutRepository {
 	
 	public function findAverageAttendanceByAO($startDate, $endDate) {
 		$sql = '
-			select wc.AO_ID, wc.DESCRIPTION, avg(wc.count) as AVERAGE from (
-				select wa.AO_ID, ao.DESCRIPTION, count(*) as count from WORKOUT_PAX wp
+		select wc.AO_ID, wc.DESCRIPTION, wc.SLUG, avg(wc.count) as AVERAGE from (
+			select wa.AO_ID, ao.DESCRIPTION, ao.SLUG, count(*) as count from WORKOUT_PAX wp
 				join WORKOUT_AO wa on wp.WORKOUT_ID = wa.WORKOUT_ID
 			    join AO ao on wa.AO_ID = ao.AO_ID
 			    join WORKOUT w on wa.WORKOUT_ID = w.WORKOUT_ID
@@ -545,7 +594,7 @@ class WorkoutRepository {
 				group by wp.WORKOUT_ID, wa.AO_ID
 			    order by AO_ID asc
 			) wc
-			group by wc.AO_ID, wc.DESCRIPTION
+			group by wc.AO_ID, wc.DESCRIPTION, wc.SLUG
 			order by AVERAGE desc
 		';
 		

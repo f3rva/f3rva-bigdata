@@ -87,6 +87,7 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS AS AO,
+					ao_agg.AO_SLUGS AS AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES AS Q,
 					wd.HTML_CONTENT -- HTML_CONTENT is outside the aggregation as it is 1:1
@@ -156,6 +157,7 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS AS AO,
+					ao_agg.AO_SLUGS AS AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES AS Q,
 					COUNT(mp.F3_NAME) AS PAX_COUNT
@@ -181,7 +183,8 @@ class WorkoutRepository {
 							select
 									wao.WORKOUT_ID,
 									GROUP_CONCAT(ao.AO_ID SEPARATOR \', \') AS AO_IDS,
-									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS
+									GROUP_CONCAT(ao.DESCRIPTION SEPARATOR \', \') AS AO_DESCRIPTIONS,
+									GROUP_CONCAT(ao.SLUG SEPARATOR \', \') AS AO_SLUGS
 							from
 									WORKOUT_AO wao
 							inner join
@@ -227,6 +230,7 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS AS AO,
+					ao_agg.AO_SLUGS as AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES AS Q,
 					COUNT(mp.F3_NAME) AS PAX_COUNT
@@ -301,6 +305,7 @@ class WorkoutRepository {
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
 					ao_agg.AO_DESCRIPTIONS AS AO,
+					ao_agg.AO_SLUGS AS AO_SLUGS,
 					q_agg.Q_IDS,
 					q_agg.Q_NAMES AS Q,
 					pax_count_agg.PAX_COUNT
@@ -438,7 +443,7 @@ class WorkoutRepository {
 	
 	public function findCount($startDate, $endDate) {
 		$sql = '
-			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
+			select w.WORKOUT_ID, w.WORKOUT_DATE, w.TITLE, w.BACKBLAST_URL, ao.AO_ID, ao.DESCRIPTION as AO, ao.SLUG as AO_SLUG, count(mp.F3_NAME) as PAX_COUNT from WORKOUT w
 				left outer join WORKOUT_PAX wp on w.WORKOUT_ID = wp.WORKOUT_ID
 				left outer join MEMBER mp on wp.MEMBER_ID = mp.MEMBER_ID
 				left outer join WORKOUT_AO wao on w.WORKOUT_ID = wao.WORKOUT_ID
@@ -453,7 +458,7 @@ class WorkoutRepository {
 		}
 		
 		$sql = $sql . '
-				group by w.WORKOUT_ID, ao.AO_ID, ao.DESCRIPTION
+				group by w.WORKOUT_ID, ao.AO_ID, ao.DESCRIPTION, ao.SLUG
 				order by w.WORKOUT_DATE desc, ao.DESCRIPTION asc
 		';
 		$stmt = $this->db->prepare($sql);

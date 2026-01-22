@@ -481,12 +481,12 @@ class WorkoutService {
 		if (!is_null(value: $workout['AO_IDS'])) {
 			$aoIds = explode(',', $workout['AO_IDS']);
 			$aoDescriptions = explode(',', $workout['AO']);
-			$aoSlugs = isset($workout['AO_SLUGS']) ? explode(',', $workout['AO_SLUGS']) : [];
+			$aoSlugs = explode(',', $workout['AO_SLUGS']);
 	
 			for ($i = 0; $i < count($aoIds); $i++) {
 				$aoId = trim(string: $aoIds[$i]);
 				$aoDescription = trim(string: $aoDescriptions[$i]);
-				$aoSlug = isset($aoSlugs[$i]) ? trim(string: $aoSlugs[$i]) : null;
+				$aoSlug = trim(string: $aoSlugs[$i]);
 	
 				// only add the AO if it exists
 				if (!is_null(value: $aoId) && $aoId !== '') {

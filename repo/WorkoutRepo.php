@@ -202,7 +202,9 @@ class WorkoutRepository {
 					w.SLUG,
 					w.BACKBLAST_URL,
 					ao_agg.AO_IDS,
-					ao_agg.AO_DESCRIPTIONS,					ao_agg.AO_SLUGS,					q_agg.Q_IDS,
+					ao_agg.AO_DESCRIPTIONS,
+					ao_agg.AO_SLUGS,
+					q_agg.Q_IDS,
 					q_agg.Q_NAMES
 			order by
 					w.WORKOUT_DATE DESC,

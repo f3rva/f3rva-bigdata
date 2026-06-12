@@ -61,7 +61,7 @@ class ReportService {
 	 * @return array of Member
 	 */
 	public function getStreakingPAXMembersByAO($aoId) {
-		$numMonths = 6;
+		$numMonths = 12;
 		$recentWorkoutAttendees = $this->workoutRepo->findRecentWorkoutAttendeesByAO($aoId, $numMonths);
 
 		// loop through the list of members, keeping track of members from the most recent workout

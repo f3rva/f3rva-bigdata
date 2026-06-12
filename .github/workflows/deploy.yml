@@ -1,0 +1,51 @@
+name: CI / Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [ published ]
+  workflow_dispatch:
+
+jobs:
+  deploy-dev:
+    name: Deploy to Development
+    environment: development
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Set up SSH Private Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Run Deploy Script
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_TARGET: ${{ secrets.REMOTE_TARGET }}
+          REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
+          SSH_KEY_FILE: /home/runner/.ssh/id_rsa
+        run: ./scripts/deploy.sh
+
+  deploy-prod:
+    name: Deploy to Production
+    environment: production
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Stub Production Deploy
+        run: |
+          echo "Production deployment is stubbed out for now."
+          echo "Target Host: ${{ secrets.REMOTE_HOST }}"
+          echo "Target Path: ${{ secrets.REMOTE_TARGET }}"

@@ -44,8 +44,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v5
 
-      - name: Stub Production Deploy
+      - name: Set up SSH Private Key
         run: |
-          echo "Production deployment is stubbed out for now."
-          echo "Target Host: ${{ secrets.REMOTE_HOST }}"
-          echo "Target Path: ${{ secrets.REMOTE_TARGET }}"
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Run Deploy Script
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_TARGET: ${{ secrets.REMOTE_TARGET }}
+          REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
+          SSH_KEY_FILE: /home/runner/.ssh/id_rsa
+        run: ./scripts/deploy.sh

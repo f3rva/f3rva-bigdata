@@ -29,6 +29,7 @@ fi
 # Set default port to 22 if not specified
 REMOTE_PORT=${REMOTE_PORT:-22}
 ARCHIVE_NAME="bigdata-deploy.tar.gz"
+ARCHIVE_PATH="/tmp/$ARCHIVE_NAME"
 
 echo "Host: $REMOTE_HOST"
 echo "Port: $REMOTE_PORT"
@@ -37,14 +38,13 @@ echo "Target Dir: $REMOTE_TARGET"
 echo "SSH Key File: $SSH_KEY_FILE"
 
 # 2. Archive local directory
-echo "==> Creating deployment archive ($ARCHIVE_NAME)..."
-tar -czf "$ARCHIVE_NAME" \
+echo "==> Creating deployment archive ($ARCHIVE_PATH)..."
+tar -czf "$ARCHIVE_PATH" \
     --exclude='.git*' \
     --exclude='.github*' \
     --exclude='.vscode*' \
     --exclude='settings.php' \
     --exclude='scripts*' \
-    --exclude="$ARCHIVE_NAME" \
     .
 
 echo "Archive created successfully."
@@ -55,7 +55,7 @@ scp -P "$REMOTE_PORT" \
     -i "$SSH_KEY_FILE" \
     -o StrictHostKeyChecking=no \
     -o UserKnownHostsFile=/dev/null \
-    "$ARCHIVE_NAME" \
+    "$ARCHIVE_PATH" \
     "$REMOTE_USER@$REMOTE_HOST:$REMOTE_TARGET/"
 
 echo "Archive uploaded successfully."
@@ -73,6 +73,6 @@ echo "Archive extracted and removed on remote host."
 
 # 5. Local Cleanup
 echo "==> Cleaning up local archive..."
-rm -f "$ARCHIVE_NAME"
+rm -f "$ARCHIVE_PATH"
 
 echo "==> Deployment completed successfully!"

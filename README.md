@@ -1,5 +1,26 @@
 # F3 RVA Big Data
 
+> [!WARNING]
+> ## ⚠️ DEPRECATED & NO LONGER IN USE
+>
+> **This repository and the legacy PHP application are officially deprecated and decommissioned.**
+>
+> The F3 RVA digital platform and Big Data analytics infrastructure have transitioned to modern decoupled services:
+> - **Frontend**: React Single Page Application ([`f3rva-website`](https://github.com/f3rva/f3rva-website))
+> - **Backend API**: Python FastAPI REST service ([`f3rva-api`](https://github.com/f3rva/f3rva-api))
+>
+> **All code in this repository is preserved solely for historical and archival purposes.** No further updates, bug fixes, or deployments will be made here.
+
+---
+
+> [!NOTE]
+> ### Historical Reference
+> The documentation below is retained for historical purposes to record how the legacy custom PHP backend (vanilla PHP service/repo layer) and frontend (Bootstrap 5 / jQuery) operated prior to decommissioning.
+
+This project was the original web application designed for F3 RVA to track and display workout backblast archives, Area of Operations (AO) directories, and PAX attendance statistics.
+
+---
+
 ## Local Development
 To run the application locally using the built-in PHP server:
 ```bash
